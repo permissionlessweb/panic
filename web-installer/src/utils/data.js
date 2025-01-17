@@ -18,7 +18,7 @@ function pingPrometheus(prometheusUrl, metric) {
 }
 
 function pingCometbftRPC(httpUrl) {
-  return sendData('/server/cosmos/cometbft', {},
+  return sendData('/server/cosmos/cometbft-rpc', {},
     { httpUrl });
 }
 

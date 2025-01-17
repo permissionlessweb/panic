@@ -1054,7 +1054,7 @@ app.post('/server/cosmos/rest', verify, async (req, res) => {
     return;
   }
 
-  const url = `${restUrl}/node_info`;
+  const url = `${restUrl}/cosmos/base/tendermint/v1beta1/node_info`;
 
   axios
     .get(url, { params: {} })
@@ -1080,7 +1080,7 @@ app.post('/server/cosmos/rest', verify, async (req, res) => {
     });
 });
 
-app.post('/server/cosmos/cometbft', verify, async (req, res) => {
+app.post('/server/cosmos/cometbft-rpc', verify, async (req, res) => {
   console.log('Received POST request for %s', req.url);
   const { httpUrl } = req.body;
 
