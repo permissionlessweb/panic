@@ -1054,7 +1054,7 @@ app.post('/server/cosmos/rest', verify, async (req, res) => {
     return;
   }
 
-  const url = `${restUrl}/node_info`;
+  const url = `${restUrl}/cosmos/base/tendermint/v1beta1/node_info`;
 
   axios
     .get(url, { params: {} })
