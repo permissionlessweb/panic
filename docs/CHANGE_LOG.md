@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 1.4.0 
+
+- Update cosmos-rpc api endpoints to support cosmos-sdk@v0.50.* & cometbft@v0.38.12
+- Replace tendermint namespaced objects with cometbft
+
 ## 1.3.1
 
 Released on 24th January 2023
