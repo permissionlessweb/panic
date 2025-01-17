@@ -34,7 +34,9 @@ class CosmosRestServerApiWrapper(ApiWrapper):
         :param cosmos_rest_url: The Cosmos REST url of the data source
         :return: Retrieves data from the cosmos_rest_url/cosmos/base/tendermint/v1beta1/syncing endpoint
         """
+ 
         endpoint = cosmos_rest_url + '/cosmos/base/tendermint/v1beta1/syncing'
+  
         return get_cosmos_json(endpoint=endpoint, logger=self.logger,
                                verify=self.verify, timeout=self.timeout)
 
