@@ -145,7 +145,7 @@ services:
     build:
       context: './'
       dockerfile: './alerter/Alerter_Dockerfile'
-    image: 'simplyvc/panic_alerter:1.3.0'
+    image: 'simplyvc/panic_alerter:1.4.0'
     logging:
       driver: "json-file"
       options:
@@ -209,7 +209,7 @@ services:
     build:
       context: './'
       dockerfile: './alerter/Health_Checker_Dockerfile'
-    image: 'simplyvc/alerter_health_checker:1.3.0'
+    image: 'simplyvc/alerter_health_checker:1.4.0'
     logging:
       driver: "json-file"
       options:
@@ -244,7 +244,7 @@ services:
     build:
       context: './'
       dockerfile: './api/Dockerfile'
-    image: 'simplyvc/panic_api:1.3.0'
+    image: 'simplyvc/panic_api:1.4.0'
     volumes:
       - './config:/opt/panic/config'
       - './certificates:/opt/panic/certificates'
@@ -266,7 +266,7 @@ services:
       args:
         - API_PORT
         - UI_DASHBOARD_PORT
-    image: 'simplyvc/panic_ui:1.3.0'
+    image: 'simplyvc/panic_ui:1.4.0'
     volumes:
       - './certificates:/opt/panic/certificates'
     ports:
@@ -284,7 +284,7 @@ services:
     build:
       context: './'
       dockerfile: './substrate-api/Dockerfile'
-    image: 'simplyvc/panic_substrate_api:1.3.0'
+    image: 'simplyvc/panic_substrate_api:1.4.0'
     volumes:
       - './certificates:/opt/panic/certificates'
     restart: always
@@ -297,7 +297,7 @@ services:
     build:
       context: './'
       dockerfile: './scripts/Migration_Alerter_Dockerfile'
-    image: 'simplyvc/panic_migration:1.3.0'
+    image: 'simplyvc/panic_migration:1.4.0'
     environment:
       - 'DB_NAME=${DB_NAME}'
       - 'WAIT_HOSTS=${DB_IP_REPLICA_1}:${DB_PORT}, ${DB_IP_REPLICA_2}:${DB_PORT}, ${DB_IP_REPLICA_3}:${DB_PORT}'

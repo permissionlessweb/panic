@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## 1.4.0 
+- Updated Cosmos cometbft rpc query definitions
+
 ## 1.3.1
 
 Released on 24th January 2023

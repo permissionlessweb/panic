@@ -1,6 +1,6 @@
 {
   "name": "substrate-api",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "API for querying Substrate data.",
   "main": "src/server.js",
   "scripts": {
