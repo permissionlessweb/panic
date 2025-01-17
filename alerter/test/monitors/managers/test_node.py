@@ -101,17 +101,17 @@ class TestNodeMonitorsManager(unittest.TestCase):
             'node_id_5', 'parent_id_5', 'node_name_5', True, 'node_http_url_5')
         self.node_config_6 = self.cosmos_test_nodes.create_custom_node(
             'node_id_6', 'parent_id_6', 'node_name_6', True, True, 'prom_url_6',
-            True, 'cosmos_rest_url_6', True, 'tendermint_rpc_url_6', True, True,
+            True, 'cosmos_rest_url_6', True, 'cometbft_rpc_url_6', True, True,
             True, 'operator_address_6'
         )
         self.node_config_7 = self.cosmos_test_nodes.create_custom_node(
             'node_id_7', 'parent_id_7', 'node_name_7', True, True, 'prom_url_7',
-            True, 'cosmos_rest_url_7', True, 'tendermint_rpc_url_7', False,
+            True, 'cosmos_rest_url_7', True, 'cometbft_rpc_url_7', False,
             False, True, 'operator_address_7'
         )
         self.node_config_8 = self.cosmos_test_nodes.create_custom_node(
             'node_id_8', 'parent_id_8', 'node_name_8', True, True, 'prom_url_8',
-            True, 'cosmos_rest_url_8', True, 'tendermint_rpc_url_8', False,
+            True, 'cosmos_rest_url_8', True, 'cometbft_rpc_url_8', False,
             False, False, 'operator_address_8'
         )
         self.node_config_9 = self.substrate_test_nodes.create_custom_node(
@@ -331,10 +331,10 @@ class TestNodeMonitorsManager(unittest.TestCase):
                         'use_as_data_source': str(
                             self.node_config_6.use_as_data_source),
                         'operator_address': self.node_config_6.operator_address,
-                        'monitor_tendermint_rpc': str(
-                            self.node_config_6.monitor_tendermint_rpc),
-                        'tendermint_rpc_url':
-                            self.node_config_6.tendermint_rpc_url
+                        'monitor_cometbft_rpc': str(
+                            self.node_config_6.monitor_cometbft_rpc),
+                        'cometbft_rpc_url':
+                            self.node_config_6.cometbft_rpc_url
                     },
                     self.node_config_7.node_id: {
                         'id': self.node_config_7.node_id,
@@ -353,10 +353,10 @@ class TestNodeMonitorsManager(unittest.TestCase):
                         'use_as_data_source': str(
                             self.node_config_7.use_as_data_source),
                         'operator_address': self.node_config_7.operator_address,
-                        'monitor_tendermint_rpc': str(
-                            self.node_config_7.monitor_tendermint_rpc),
-                        'tendermint_rpc_url':
-                            self.node_config_7.tendermint_rpc_url
+                        'monitor_cometbft_rpc': str(
+                            self.node_config_7.monitor_cometbft_rpc),
+                        'cometbft_rpc_url':
+                            self.node_config_7.cometbft_rpc_url
                     },
                     self.node_config_8.node_id: {
                         'id': self.node_config_8.node_id,
@@ -375,10 +375,10 @@ class TestNodeMonitorsManager(unittest.TestCase):
                         'use_as_data_source': str(
                             self.node_config_8.use_as_data_source),
                         'operator_address': self.node_config_8.operator_address,
-                        'monitor_tendermint_rpc': str(
-                            self.node_config_8.monitor_tendermint_rpc),
-                        'tendermint_rpc_url':
-                            self.node_config_8.tendermint_rpc_url
+                        'monitor_cometbft_rpc': str(
+                            self.node_config_8.monitor_cometbft_rpc),
+                        'cometbft_rpc_url':
+                            self.node_config_8.cometbft_rpc_url
                     }
                 }
             },
@@ -487,9 +487,9 @@ class TestNodeMonitorsManager(unittest.TestCase):
                 'use_as_data_source': str(
                     self.node_config_6.use_as_data_source),
                 'operator_address': self.node_config_6.operator_address,
-                'monitor_tendermint_rpc': str(
-                    self.node_config_6.monitor_tendermint_rpc),
-                'tendermint_rpc_url': self.node_config_6.tendermint_rpc_url
+                'monitor_cometbft_rpc': str(
+                    self.node_config_6.monitor_cometbft_rpc),
+                'cometbft_rpc_url': self.node_config_6.cometbft_rpc_url
             },
             self.node_config_7.node_id: {
                 'id': self.node_config_7.node_id,
@@ -507,9 +507,9 @@ class TestNodeMonitorsManager(unittest.TestCase):
                 'use_as_data_source': str(
                     self.node_config_7.use_as_data_source),
                 'operator_address': self.node_config_7.operator_address,
-                'monitor_tendermint_rpc': str(
-                    self.node_config_7.monitor_tendermint_rpc),
-                'tendermint_rpc_url': self.node_config_7.tendermint_rpc_url
+                'monitor_cometbft_rpc': str(
+                    self.node_config_7.monitor_cometbft_rpc),
+                'cometbft_rpc_url': self.node_config_7.cometbft_rpc_url
             },
             self.node_config_8.node_id: {
                 'id': self.node_config_8.node_id,
@@ -527,9 +527,9 @@ class TestNodeMonitorsManager(unittest.TestCase):
                 'use_as_data_source': str(
                     self.node_config_8.use_as_data_source),
                 'operator_address': self.node_config_8.operator_address,
-                'monitor_tendermint_rpc': str(
-                    self.node_config_8.monitor_tendermint_rpc),
-                'tendermint_rpc_url': self.node_config_8.tendermint_rpc_url
+                'monitor_cometbft_rpc': str(
+                    self.node_config_8.monitor_cometbft_rpc),
+                'cometbft_rpc_url': self.node_config_8.cometbft_rpc_url
             }
         }
         self.sent_configs_example_polkadot = {
@@ -876,7 +876,7 @@ class TestNodeMonitorsManager(unittest.TestCase):
                        "process_and_send_monitorable_data")
     @mock.patch.object(NodeMonitorsManager, "_create_and_start_monitor_process")
     def test_process_cosmos_node_configs_starts_monitors_for_new_configs(
-            self, monitor_node, monitor_prometheus, monitor_tendermint,
+            self, monitor_node, monitor_prometheus, monitor_cometbft,
             monitor_rest, startup_mock, mock_process_send_mon_data) -> None:
         # We will check whether _create_and_start_monitor_process is called
         # correctly on each newly added configuration if
@@ -895,7 +895,7 @@ class TestNodeMonitorsManager(unittest.TestCase):
         sent_configs[self.node_config_8.node_id][
             'monitor_cosmos_rest'] = monitor_rest
         sent_configs[self.node_config_8.node_id][
-            'monitor_tendermint_rpc'] = monitor_tendermint
+            'monitor_cometbft_rpc'] = monitor_cometbft
         self.test_manager._process_cosmos_node_configs(sent_configs, {}, '', '')
         expected_calls = [
             call(self.node_config_6, self.node_config_6.node_id,
@@ -934,7 +934,7 @@ class TestNodeMonitorsManager(unittest.TestCase):
                        "process_and_send_monitorable_data")
     @mock.patch.object(NodeMonitorsManager, "_create_and_start_monitor_process")
     def test_process_cosmos_node_configs_return_if_valid_new_configurations(
-            self, monitor_node, monitor_prometheus, monitor_tendermint,
+            self, monitor_node, monitor_prometheus, monitor_cometbft,
             monitor_rest, startup_mock, mock_process_send_mon_data) -> None:
         # In this test we will assume that all added configurations are valid.
         # Thus we need to check that the function returns a dict containing all
@@ -952,7 +952,7 @@ class TestNodeMonitorsManager(unittest.TestCase):
         sent_configs[self.node_config_8.node_id][
             'monitor_cosmos_rest'] = monitor_rest
         sent_configs[self.node_config_8.node_id][
-            'monitor_tendermint_rpc'] = monitor_tendermint
+            'monitor_cometbft_rpc'] = monitor_cometbft
         actual_return = self.test_manager._process_cosmos_node_configs(
             sent_configs, {}, '', '')
         expected_return = copy.deepcopy(sent_configs)
@@ -981,7 +981,7 @@ class TestNodeMonitorsManager(unittest.TestCase):
     @mock.patch.object(multiprocessing.Process, "terminate")
     @mock.patch.object(multiprocessing, 'Process')
     def test_process_cosmos_node_configs_restarts_monitors_for_edited_confs(
-            self, monitor_node, monitor_prometheus, monitor_tendermint,
+            self, monitor_node, monitor_prometheus, monitor_cometbft,
             monitor_rest, mock_init, mock_terminate, mock_join,
             mock_start, mock_process_send_mon_data) -> None:
         # We will check that the running monitors associated with the modified
@@ -1006,7 +1006,7 @@ class TestNodeMonitorsManager(unittest.TestCase):
         sent_configs[self.node_config_6.node_id][
             'monitor_cosmos_rest'] = monitor_rest
         sent_configs[self.node_config_6.node_id][
-            'monitor_tendermint_rpc'] = monitor_tendermint
+            'monitor_cometbft_rpc'] = monitor_cometbft
 
         # Assume that for config_7 the name of the node was changed. Node 8
         # will be restarted because there was a change in data sources.
@@ -1031,13 +1031,13 @@ class TestNodeMonitorsManager(unittest.TestCase):
         modified_node_7_config = self.cosmos_test_nodes.create_custom_node(
             'node_id_7', 'parent_id_7', 'changed_node_name', True, True,
             'prom_url_7', True, 'cosmos_rest_url_7', True,
-            'tendermint_rpc_url_7', False, False, True, 'operator_address_7'
+            'cometbft_rpc_url_7', False, False, True, 'operator_address_7'
         )
         expected_node_6_config = self.cosmos_test_nodes.create_custom_node(
             'node_id_6', 'parent_id_6', 'node_name_6',
             str_to_bool(monitor_node), str_to_bool(monitor_prometheus),
             'prom_url_6', str_to_bool(monitor_rest), 'cosmos_rest_url_6',
-            str_to_bool(monitor_tendermint), 'tendermint_rpc_url_6', True, True,
+            str_to_bool(monitor_cometbft), 'cometbft_rpc_url_6', True, True,
             True, 'operator_address_6'
         )
 
@@ -1181,7 +1181,7 @@ class TestNodeMonitorsManager(unittest.TestCase):
     @mock.patch.object(multiprocessing.Process, "terminate")
     @mock.patch.object(NodeMonitorsManager, "_create_and_start_monitor_process")
     def test_process_cosmos_node_configs_return_if_valid_edited_confs(
-            self, monitor_node, monitor_prometheus, monitor_tendermint,
+            self, monitor_node, monitor_prometheus, monitor_cometbft,
             monitor_rest, startup_mock, mock_terminate, mock_join,
             mock_process_send_mon_data) -> None:
         # In this test we will assume that all edited configurations are valid.
@@ -1205,7 +1205,7 @@ class TestNodeMonitorsManager(unittest.TestCase):
         sent_configs[self.node_config_6.node_id][
             'monitor_cosmos_rest'] = monitor_rest
         sent_configs[self.node_config_6.node_id][
-            'monitor_tendermint_rpc'] = monitor_tendermint
+            'monitor_cometbft_rpc'] = monitor_cometbft
 
         # Assume that for config_7 the name of the node was changed. Node 8
         # will be restarted because there was a change in data sources.

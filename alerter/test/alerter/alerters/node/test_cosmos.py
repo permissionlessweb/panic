@@ -28,7 +28,7 @@ from src.utils.env import RABBIT_IP
 from src.utils.exceptions import (
     PANICException, NodeIsDownException, InvalidUrlException,
     MetricNotFoundException, NoSyncedDataSourceWasAccessibleException,
-    CosmosRestServerDataCouldNotBeObtained, TendermintRPCDataCouldNotBeObtained)
+    CosmosRestServerDataCouldNotBeObtained, CometbftRPCDataCouldNotBeObtained)
 from test.test_utils.utils import (
     connect_to_rabbit, delete_queue_if_exists, delete_exchange_if_exists,
     disconnect_from_rabbit)
@@ -59,7 +59,7 @@ class TestCosmosNodeAlerter(unittest.TestCase):
         self.test_exception = PANICException('test_exception', 1)
         self.test_node_is_down_exception = NodeIsDownException(
             self.test_node_name)
-        self.test_is_mev_tendermint_node = False
+        self.test_is_mev_cometbft_node = False
         # Now we will construct the expected config objects
         self.received_configurations = {'DEFAULT': 'testing_if_will_be_deleted'}
         metrics_without_time_window = [
@@ -70,8 +70,8 @@ class TestCosmosNodeAlerter(unittest.TestCase):
             'cannot_access_prometheus_node',
             'cannot_access_cosmos_rest_validator',
             'cannot_access_cosmos_rest_node',
-            'cannot_access_tendermint_rpc_validator',
-            'cannot_access_tendermint_rpc_node',
+            'cannot_access_cometbft_rpc_validator',
+            'cannot_access_cometbft_rpc_node',
         ]
         metrics_with_time_window = ['missed_blocks']
         severity_metrics = [
@@ -160,14 +160,14 @@ class TestCosmosNodeAlerter(unittest.TestCase):
                     },
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'result': {
                     'meta_data': {
                         'node_name': self.test_node_name,
                         'node_id': self.test_node_id,
                         'node_parent_id': self.test_parent_id,
                         'last_monitored': self.test_last_monitored,
-                        'is_mev_tendermint_node': self.test_is_mev_tendermint_node,
+                        'is_mev_cometbft_node': self.test_is_mev_cometbft_node,
                         'is_validator': self.test_is_validator,
                         'operator_address': self.test_operator_address,
                     },
@@ -204,9 +204,9 @@ class TestCosmosNodeAlerter(unittest.TestCase):
         }
 
         self.transformed_data_result_mev = copy.deepcopy(self.transformed_data_result)
-        self.transformed_data_result_mev['tendermint_rpc']['result']['meta_data']['is_mev_tendermint_node'] = not self.test_is_mev_tendermint_node
-        self.transformed_data_result_mev['tendermint_rpc']['result']['data']['is_peered_with_sentinel'] = {
-            'current': not self.test_is_mev_tendermint_node,
+        self.transformed_data_result_mev['cometbft_rpc']['result']['meta_data']['is_mev_cometbft_node'] = not self.test_is_mev_cometbft_node
+        self.transformed_data_result_mev['cometbft_rpc']['result']['data']['is_peered_with_sentinel'] = {
+            'current': not self.test_is_mev_cometbft_node,
             'previous': None,
         }
 
@@ -239,14 +239,14 @@ class TestCosmosNodeAlerter(unittest.TestCase):
                     'code': self.test_exception.code,
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'error': {
                     'meta_data': {
                         'node_name': self.test_node_name,
                         'node_id': self.test_node_id,
                         'node_parent_id': self.test_parent_id,
                         'time': self.test_last_monitored,
-                        'is_mev_tendermint_node': self.test_is_mev_tendermint_node,
+                        'is_mev_cometbft_node': self.test_is_mev_cometbft_node,
                         'is_validator': self.test_is_validator,
                         'operator_address': self.test_operator_address,
                     },
@@ -296,14 +296,14 @@ class TestCosmosNodeAlerter(unittest.TestCase):
                     }
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'error': {
                     'meta_data': {
                         'node_name': self.test_node_name,
                         'node_id': self.test_node_id,
                         'node_parent_id': self.test_parent_id,
                         'time': self.test_last_monitored,
-                        'is_mev_tendermint_node' : self.test_is_mev_tendermint_node,
+                        'is_mev_cometbft_node' : self.test_is_mev_cometbft_node,
                         'is_validator': self.test_is_validator,
                         'operator_address': self.test_operator_address,
                     },
@@ -1054,16 +1054,16 @@ class TestCosmosNodeAlerter(unittest.TestCase):
     @mock.patch.object(CosmosNodeAlertingFactory, "classify_conditional_alert")
     @mock.patch.object(CosmosNodeAlertingFactory,
                        "classify_thresholded_in_time_period_alert")
-    def test_process_tendermint_rpc_result_does_nothing_if_config_not_received(
+    def test_process_cometbft_rpc_result_does_nothing_if_config_not_received(
             self, mock_thresh_time, mock_conditional, mock_error_alert) -> None:
         """
         In this test we will check that no classification function is called
-        if tendermint_rpc data has been received for a node who's associated
+        if cometbft_rpc data has been received for a node who's associated
         alerts configuration is not received yet.
         """
         data_for_alerting = []
-        self.test_alerter._process_tendermint_rpc_result(
-            self.transformed_data_result['tendermint_rpc']['result'],
+        self.test_alerter._process_cometbft_rpc_result(
+            self.transformed_data_result['cometbft_rpc']['result'],
             data_for_alerting)
 
         mock_conditional.assert_not_called()
@@ -1074,7 +1074,7 @@ class TestCosmosNodeAlerter(unittest.TestCase):
     @mock.patch.object(CosmosNodeAlertingFactory, "classify_conditional_alert")
     @mock.patch.object(CosmosNodeAlertingFactory,
                        "classify_thresholded_in_time_period_alert")
-    def test_process_tendermint_rpc_result_does_not_classify_if_metrics_disable(
+    def test_process_cometbft_rpc_result_does_not_classify_if_metrics_disable(
             self, mock_thresh_time, mock_conditional, mock_error_alert) -> None:
         """
         In this test we will check that if a metric is disabled from the config,
@@ -1095,8 +1095,8 @@ class TestCosmosNodeAlerter(unittest.TestCase):
                                                  self.received_configurations)
 
         data_for_alerting = []
-        self.test_alerter._process_tendermint_rpc_result(
-            self.transformed_data_result['tendermint_rpc']['result'],
+        self.test_alerter._process_cometbft_rpc_result(
+            self.transformed_data_result['cometbft_rpc']['result'],
             data_for_alerting)
 
         mock_thresh_time.assert_not_called()
@@ -1105,29 +1105,29 @@ class TestCosmosNodeAlerter(unittest.TestCase):
         calls = mock_error_alert.call_args_list
         self.assertEqual(3, mock_error_alert.call_count)
         call_1 = call(
-            InvalidUrlException.code, TendermintRPCInvalidUrlAlert,
-            TendermintRPCValidUrlAlert, data_for_alerting, self.test_parent_id,
+            InvalidUrlException.code, CometbftRPCInvalidUrlAlert,
+            CometbftRPCValidUrlAlert, data_for_alerting, self.test_parent_id,
             self.test_node_id, self.test_node_name, self.test_last_monitored,
-            GroupedCosmosNodeAlertsMetricCode.TendermintRPCInvalidUrl.value, "",
-            "Tendermint-RPC url is now valid!", None)
+            GroupedCosmosNodeAlertsMetricCode.CometbftRPCInvalidUrl.value, "",
+            "Cometbft-RPC url is now valid!", None)
         call_2 = call(
             NoSyncedDataSourceWasAccessibleException.code,
-            ErrorNoSyncedTendermintRPCDataSourcesAlert,
-            SyncedTendermintRPCDataSourcesFoundAlert, data_for_alerting,
+            ErrorNoSyncedCometbftRPCDataSourcesAlert,
+            SyncedCometbftRPCDataSourcesFoundAlert, data_for_alerting,
             self.test_parent_id, self.test_node_id, self.test_node_name,
             self.test_last_monitored,
-            GroupedCosmosNodeAlertsMetricCode.NoSyncedTendermintRPCSource.value,
-            "", "The monitor for {} found a Tendermint-RPC synced data source "
+            GroupedCosmosNodeAlertsMetricCode.NoSyncedCometbftRPCSource.value,
+            "", "The monitor for {} found a Cometbft-RPC synced data source "
                 "again".format(self.test_node_name), None)
         call_3 = call(
-            TendermintRPCDataCouldNotBeObtained.code,
-            TendermintRPCDataCouldNotBeObtainedAlert,
-            TendermintRPCDataObtainedAlert, data_for_alerting,
+            CometbftRPCDataCouldNotBeObtained.code,
+            CometbftRPCDataCouldNotBeObtainedAlert,
+            CometbftRPCDataObtainedAlert, data_for_alerting,
             self.test_parent_id, self.test_node_id, self.test_node_name,
             self.test_last_monitored,
-            GroupedCosmosNodeAlertsMetricCode.TendermintRPCDataNotObtained
+            GroupedCosmosNodeAlertsMetricCode.CometbftRPCDataNotObtained
                 .value, "",
-            "The monitor for {} successfully retrieved Tendermint-RPC data "
+            "The monitor for {} successfully retrieved Cometbft-RPC data "
             "again.".format(self.test_node_name), None)
         self.assertTrue(call_1 in calls)
         self.assertTrue(call_2 in calls)
@@ -1139,12 +1139,12 @@ class TestCosmosNodeAlerter(unittest.TestCase):
                        "classify_thresholded_in_time_period_alert")
     @mock.patch.object(CosmosNodeAlertingFactory,
                        "classify_solvable_conditional_alert_no_repetition")
-    def test_process_tendermint_rpc_result_classifies_correctly_if_data_valid(
+    def test_process_cometbft_rpc_result_classifies_correctly_if_data_valid(
             self, mock_solvable_conditional, mock_thresh_time, mock_conditional,
             mock_error_alert) -> None:
         """
         In this test we will check that the correct classification functions are
-        called correctly by the process_tendermint_rpc_result function. Note
+        called correctly by the process_cometbft_rpc_result function. Note
         that the actual logic for these classification functions was tested in
         the alert factory class.
         """
@@ -1157,36 +1157,36 @@ class TestCosmosNodeAlerter(unittest.TestCase):
         configs = self.test_configs_factory.configs[chain]
 
         data_for_alerting = []
-        self.test_alerter._process_tendermint_rpc_result(
-            self.transformed_data_result['tendermint_rpc']['result'],
+        self.test_alerter._process_cometbft_rpc_result(
+            self.transformed_data_result['cometbft_rpc']['result'],
             data_for_alerting)
 
         calls = mock_error_alert.call_args_list
         self.assertEqual(3, mock_error_alert.call_count)
         call_1 = call(
-            InvalidUrlException.code, TendermintRPCInvalidUrlAlert,
-            TendermintRPCValidUrlAlert, data_for_alerting, self.test_parent_id,
+            InvalidUrlException.code, CometbftRPCInvalidUrlAlert,
+            CometbftRPCValidUrlAlert, data_for_alerting, self.test_parent_id,
             self.test_node_id, self.test_node_name, self.test_last_monitored,
-            GroupedCosmosNodeAlertsMetricCode.TendermintRPCInvalidUrl.value, "",
-            "Tendermint-RPC url is now valid!", None)
+            GroupedCosmosNodeAlertsMetricCode.CometbftRPCInvalidUrl.value, "",
+            "Cometbft-RPC url is now valid!", None)
         call_2 = call(
             NoSyncedDataSourceWasAccessibleException.code,
-            ErrorNoSyncedTendermintRPCDataSourcesAlert,
-            SyncedTendermintRPCDataSourcesFoundAlert, data_for_alerting,
+            ErrorNoSyncedCometbftRPCDataSourcesAlert,
+            SyncedCometbftRPCDataSourcesFoundAlert, data_for_alerting,
             self.test_parent_id, self.test_node_id, self.test_node_name,
             self.test_last_monitored,
-            GroupedCosmosNodeAlertsMetricCode.NoSyncedTendermintRPCSource.value,
-            "", "The monitor for {} found a Tendermint-RPC synced data source "
+            GroupedCosmosNodeAlertsMetricCode.NoSyncedCometbftRPCSource.value,
+            "", "The monitor for {} found a Cometbft-RPC synced data source "
                 "again".format(self.test_node_name), None)
         call_3 = call(
-            TendermintRPCDataCouldNotBeObtained.code,
-            TendermintRPCDataCouldNotBeObtainedAlert,
-            TendermintRPCDataObtainedAlert, data_for_alerting,
+            CometbftRPCDataCouldNotBeObtained.code,
+            CometbftRPCDataCouldNotBeObtainedAlert,
+            CometbftRPCDataObtainedAlert, data_for_alerting,
             self.test_parent_id, self.test_node_id, self.test_node_name,
             self.test_last_monitored,
-            GroupedCosmosNodeAlertsMetricCode.TendermintRPCDataNotObtained
+            GroupedCosmosNodeAlertsMetricCode.CometbftRPCDataNotObtained
                 .value, "",
-            "The monitor for {} successfully retrieved Tendermint-RPC data "
+            "The monitor for {} successfully retrieved Cometbft-RPC data "
             "again.".format(self.test_node_name), None)
         self.assertTrue(call_1 in calls)
         self.assertTrue(call_2 in calls)
@@ -1194,7 +1194,7 @@ class TestCosmosNodeAlerter(unittest.TestCase):
 
         calls = mock_conditional.call_args_list
         self.assertEqual(3, mock_conditional.call_count)
-        current = self.transformed_data_result['tendermint_rpc']['result'][
+        current = self.transformed_data_result['cometbft_rpc']['result'][
             'data']['slashed']['current']
         slashed_configs = configs.slashed
         call_1 = call(
@@ -1224,9 +1224,9 @@ class TestCosmosNodeAlerter(unittest.TestCase):
 
         calls = mock_thresh_time.call_args_list
         self.assertEqual(1, mock_thresh_time.call_count)
-        current = self.transformed_data_result['tendermint_rpc']['result'][
+        current = self.transformed_data_result['cometbft_rpc']['result'][
             'data']['missed_blocks']['current']
-        previous = self.transformed_data_result['tendermint_rpc']['result'][
+        previous = self.transformed_data_result['cometbft_rpc']['result'][
             'data']['missed_blocks']['previous']
         missed_blocks_configs = configs.missed_blocks
         call_1 = call(
@@ -1245,7 +1245,7 @@ class TestCosmosNodeAlerter(unittest.TestCase):
             configs.validator_is_syncing if self.test_is_validator
             else configs.node_is_syncing
         )
-        current = self.transformed_data_result['tendermint_rpc']['result'][
+        current = self.transformed_data_result['cometbft_rpc']['result'][
             'data']['is_syncing']['current']
         call_1 = call(
             self.test_parent_id, self.test_node_id,
@@ -1261,7 +1261,7 @@ class TestCosmosNodeAlerter(unittest.TestCase):
 
     @mock.patch.object(CosmosNodeAlertingFactory,
                        "classify_solvable_conditional_alert_no_repetition")
-    def test_process_tendermint_rpc_result_classify_sentinel_peering(
+    def test_process_cometbft_rpc_result_classify_sentinel_peering(
             self, mock_solvable_conditional) -> None:
         """
         In this test we will check that the classification functions for sentinel peering are triggered when the
@@ -1276,8 +1276,8 @@ class TestCosmosNodeAlerter(unittest.TestCase):
         configs = self.test_configs_factory.configs[chain]
 
         data_for_alerting = []
-        self.test_alerter._process_tendermint_rpc_result(
-            self.transformed_data_result_mev['tendermint_rpc']['result'],
+        self.test_alerter._process_cometbft_rpc_result(
+            self.transformed_data_result_mev['cometbft_rpc']['result'],
             data_for_alerting)
 
         calls = mock_solvable_conditional.call_args_list
@@ -1293,7 +1293,7 @@ class TestCosmosNodeAlerter(unittest.TestCase):
             else configs.node_is_peered_with_sentinel
         )
 
-        current = self.transformed_data_result['tendermint_rpc']['result'][
+        current = self.transformed_data_result['cometbft_rpc']['result'][
             'data']['is_syncing']['current']
         call_1 = call(
             self.test_parent_id, self.test_node_id,
@@ -1307,7 +1307,7 @@ class TestCosmosNodeAlerter(unittest.TestCase):
              self.test_last_monitored, self.test_parent_id, self.test_node_id])
         self.assertTrue(call_1 in calls)
 
-        current = self.transformed_data_result_mev['tendermint_rpc']['result']['data']['is_peered_with_sentinel']['current']
+        current = self.transformed_data_result_mev['cometbft_rpc']['result']['data']['is_peered_with_sentinel']['current']
         call_2 = call(
             self.test_parent_id, self.test_node_id,
             GroupedCosmosNodeAlertsMetricCode.NodeIsNotPeeredWithSentinel.value,
@@ -1321,26 +1321,26 @@ class TestCosmosNodeAlerter(unittest.TestCase):
         self.assertTrue(call_2 in calls)
 
     @mock.patch.object(CosmosNodeAlertingFactory, "classify_error_alert")
-    def test_process_tendermint_rpc_error_does_nothing_if_config_not_received(
+    def test_process_cometbft_rpc_error_does_nothing_if_config_not_received(
             self, mock_error_alert) -> None:
         """
         In this test we will check that no classification function is called
-        if tendermint_rpc data has been received for a node who's associated
+        if cometbft_rpc data has been received for a node who's associated
         alerts configuration is not received yet.
         """
         data_for_alerting = []
-        self.test_alerter._process_tendermint_rpc_error(
-            self.transformed_data_general_error['tendermint_rpc']['error'],
+        self.test_alerter._process_cometbft_rpc_error(
+            self.transformed_data_general_error['cometbft_rpc']['error'],
             data_for_alerting)
 
         mock_error_alert.assert_not_called()
 
     @mock.patch.object(CosmosNodeAlertingFactory, "classify_error_alert")
-    def test_process_tendermint_rpc_error_classifies_correctly_if_data_valid(
+    def test_process_cometbft_rpc_error_classifies_correctly_if_data_valid(
             self, mock_error_alert) -> None:
         """
         In this test we will check that the correct classification functions are
-        called correctly by the process_tendermint_rpc_error function. Note that
+        called correctly by the process_cometbft_rpc_error function. Note that
         the actual logic for these classification functions was tested in the
         alert factory class.
         """
@@ -1352,40 +1352,40 @@ class TestCosmosNodeAlerter(unittest.TestCase):
                                                  self.received_configurations)
 
         data_for_alerting = []
-        self.test_alerter._process_tendermint_rpc_error(
-            self.transformed_data_general_error['tendermint_rpc']['error'],
+        self.test_alerter._process_cometbft_rpc_error(
+            self.transformed_data_general_error['cometbft_rpc']['error'],
             data_for_alerting)
 
         calls = mock_error_alert.call_args_list
         self.assertEqual(3, mock_error_alert.call_count)
-        error_msg = self.transformed_data_general_error['tendermint_rpc'][
+        error_msg = self.transformed_data_general_error['cometbft_rpc'][
             'error']['message']
-        error_code = self.transformed_data_general_error['tendermint_rpc'][
+        error_code = self.transformed_data_general_error['cometbft_rpc'][
             'error']['code']
         call_1 = call(
-            InvalidUrlException.code, TendermintRPCInvalidUrlAlert,
-            TendermintRPCValidUrlAlert, data_for_alerting, self.test_parent_id,
+            InvalidUrlException.code, CometbftRPCInvalidUrlAlert,
+            CometbftRPCValidUrlAlert, data_for_alerting, self.test_parent_id,
             self.test_node_id, self.test_node_name, self.test_last_monitored,
-            GroupedCosmosNodeAlertsMetricCode.TendermintRPCInvalidUrl.value,
-            error_msg, "Tendermint-RPC url is now valid!", error_code)
+            GroupedCosmosNodeAlertsMetricCode.CometbftRPCInvalidUrl.value,
+            error_msg, "Cometbft-RPC url is now valid!", error_code)
         call_2 = call(
             NoSyncedDataSourceWasAccessibleException.code,
-            ErrorNoSyncedTendermintRPCDataSourcesAlert,
-            SyncedTendermintRPCDataSourcesFoundAlert, data_for_alerting,
+            ErrorNoSyncedCometbftRPCDataSourcesAlert,
+            SyncedCometbftRPCDataSourcesFoundAlert, data_for_alerting,
             self.test_parent_id, self.test_node_id, self.test_node_name,
             self.test_last_monitored,
-            GroupedCosmosNodeAlertsMetricCode.NoSyncedTendermintRPCSource.value,
-            error_msg, "The monitor for {} found a Tendermint-RPC synced data "
+            GroupedCosmosNodeAlertsMetricCode.NoSyncedCometbftRPCSource.value,
+            error_msg, "The monitor for {} found a Cometbft-RPC synced data "
                        "source again".format(self.test_node_name), error_code)
         call_3 = call(
-            TendermintRPCDataCouldNotBeObtained.code,
-            TendermintRPCDataCouldNotBeObtainedAlert,
-            TendermintRPCDataObtainedAlert, data_for_alerting,
+            CometbftRPCDataCouldNotBeObtained.code,
+            CometbftRPCDataCouldNotBeObtainedAlert,
+            CometbftRPCDataObtainedAlert, data_for_alerting,
             self.test_parent_id, self.test_node_id, self.test_node_name,
             self.test_last_monitored,
-            GroupedCosmosNodeAlertsMetricCode.TendermintRPCDataNotObtained
+            GroupedCosmosNodeAlertsMetricCode.CometbftRPCDataNotObtained
                 .value, error_msg,
-            "The monitor for {} successfully retrieved Tendermint-RPC data "
+            "The monitor for {} successfully retrieved Cometbft-RPC data "
             "again.".format(self.test_node_name), error_code)
         self.assertTrue(call_1 in calls)
         self.assertTrue(call_2 in calls)
@@ -1523,17 +1523,17 @@ class TestCosmosNodeAlerter(unittest.TestCase):
             data_for_alerting, self.test_parent_id, self.test_node_id,
             GroupedCosmosNodeAlertsMetricCode.CosmosRestSourceIsDown.value,
             self.test_node_name, self.test_last_monitored)
-        tendermint_rpc_down_configs = (
-            configs.cannot_access_tendermint_rpc_validator
+        cometbft_rpc_down_configs = (
+            configs.cannot_access_cometbft_rpc_validator
             if self.test_is_validator
-            else configs.cannot_access_tendermint_rpc_node
+            else configs.cannot_access_cometbft_rpc_node
         )
         call_4 = call(
-            None, tendermint_rpc_down_configs, TendermintRPCSourceIsDownAlert,
-            TendermintRPCSourceStillDownAlert,
-            TendermintRPCSourceBackUpAgainAlert, data_for_alerting,
+            None, cometbft_rpc_down_configs, CometbftRPCSourceIsDownAlert,
+            CometbftRPCSourceStillDownAlert,
+            CometbftRPCSourceBackUpAgainAlert, data_for_alerting,
             self.test_parent_id, self.test_node_id,
-            GroupedCosmosNodeAlertsMetricCode.TendermintRPCSourceIsDown.value,
+            GroupedCosmosNodeAlertsMetricCode.CometbftRPCSourceIsDown.value,
             self.test_node_name, self.test_last_monitored)
         self.assertTrue(call_1 in calls)
         self.assertTrue(call_2 in calls)
@@ -1565,9 +1565,9 @@ class TestCosmosNodeAlerter(unittest.TestCase):
                 'result': self.test_alerter._process_cosmos_rest_result,
                 'error': self.test_alerter._process_cosmos_rest_error,
             },
-            'tendermint_rpc': {
-                'result': self.test_alerter._process_tendermint_rpc_result,
-                'error': self.test_alerter._process_tendermint_rpc_error,
+            'cometbft_rpc': {
+                'result': self.test_alerter._process_cometbft_rpc_result,
+                'error': self.test_alerter._process_cometbft_rpc_error,
             },
         }
         mock_helper.assert_called_once_with(

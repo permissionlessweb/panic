@@ -5,10 +5,10 @@ from unittest import mock
 from requests import Response
 
 from src.api_wrappers.cosmos import (CosmosRestServerApiWrapper,
-                                     TendermintRpcApiWrapper)
+                                     CometbftRpcApiWrapper)
 from src.utils.exceptions import (
     CosmosSDKVersionIncompatibleException, CosmosRestServerApiCallException,
-    TendermintRPCIncompatibleException, TendermintRPCCallException)
+    CometbftRPCIncompatibleException, CometbftRPCCallException)
 
 
 class TestCosmosRestServerApiWrapper(unittest.TestCase):
@@ -65,10 +65,10 @@ class TestCosmosRestServerApiWrapper(unittest.TestCase):
             verify=self.verify, timeout=self.timeout)
 
     @mock.patch("src.api_wrappers.cosmos.get_cosmos_json")
-    def test_get_staking_validators_v0_42_6_calls_api_correctly(
+    def test_get_staking_validators_calls_api_correctly(
             self, mock_get_cosmos_json) -> None:
         # Test when validator_address and params are None
-        self.test_wrapper.get_staking_validators_v0_42_6(self.cosmos_rest_url)
+        self.test_wrapper.get_staking_validators(self.cosmos_rest_url)
         mock_get_cosmos_json.assert_called_once_with(
             endpoint="{}/cosmos/staking/v1beta1/validators".format(
                 self.cosmos_rest_url), logger=self.dummy_logger, params=None,
@@ -76,7 +76,7 @@ class TestCosmosRestServerApiWrapper(unittest.TestCase):
         mock_get_cosmos_json.reset_mock()
 
         # Test when validator_address and params are not None
-        self.test_wrapper.get_staking_validators_v0_42_6(self.cosmos_rest_url,
+        self.test_wrapper.get_staking_validators(self.cosmos_rest_url,
                                                          self.validator_address,
                                                          self.test_params)
         mock_get_cosmos_json.assert_called_once_with(
@@ -193,20 +193,20 @@ class TestCosmosRestServerApiWrapper(unittest.TestCase):
                           self.supported_version)
 
 
-class TestTendermintRpcApiWrapper(unittest.TestCase):
+class TestCometbftRpcApiWrapper(unittest.TestCase):
     def setUp(self) -> None:
         # Some dummy data
         self.dummy_logger = logging.getLogger('Dummy')
         self.dummy_logger.disabled = True
         self.verify = True
         self.timeout = 20
-        self.tendermint_rpc_url = 'test_tendermint_rpc_url'
+        self.cometbft_rpc_url = 'test_cometbft_rpc_url'
         self.test_params = {'param_key': 'val'}
         self.test_dict = {'test_key': 567}
         self.node_name = 'test_node_name'
 
         # Test instance
-        self.test_wrapper = TendermintRpcApiWrapper(self.dummy_logger,
+        self.test_wrapper = CometbftRpcApiWrapper(self.dummy_logger,
                                                     self.verify,
                                                     self.timeout)
 
@@ -217,18 +217,18 @@ class TestTendermintRpcApiWrapper(unittest.TestCase):
     @mock.patch("src.api_wrappers.cosmos.get_cosmos_json")
     def test_get_block_calls_api_correctly(self, mock_get_cosmos_json) -> None:
         # First test with parameters not None
-        self.test_wrapper.get_block(self.tendermint_rpc_url, self.test_params)
+        self.test_wrapper.get_block(self.cometbft_rpc_url, self.test_params)
         mock_get_cosmos_json.assert_called_once_with(
-            endpoint="{}/block".format(self.tendermint_rpc_url),
+            endpoint="{}/block".format(self.cometbft_rpc_url),
             logger=self.dummy_logger, verify=self.verify, timeout=self.timeout,
             params=self.test_params
         )
         mock_get_cosmos_json.reset_mock()
 
         # Test with parameters None
-        self.test_wrapper.get_block(self.tendermint_rpc_url)
+        self.test_wrapper.get_block(self.cometbft_rpc_url)
         mock_get_cosmos_json.assert_called_once_with(
-            endpoint="{}/block".format(self.tendermint_rpc_url),
+            endpoint="{}/block".format(self.cometbft_rpc_url),
             logger=self.dummy_logger, verify=self.verify, timeout=self.timeout,
             params=None
         )
@@ -237,28 +237,28 @@ class TestTendermintRpcApiWrapper(unittest.TestCase):
     def test_get_block_results_calls_api_correctly(
             self, mock_get_cosmos_json) -> None:
         # First test with parameters not None
-        self.test_wrapper.get_block_results(self.tendermint_rpc_url,
+        self.test_wrapper.get_block_results(self.cometbft_rpc_url,
                                             self.test_params)
         mock_get_cosmos_json.assert_called_once_with(
-            endpoint="{}/block_results".format(self.tendermint_rpc_url),
+            endpoint="{}/block_results".format(self.cometbft_rpc_url),
             logger=self.dummy_logger, verify=self.verify, timeout=self.timeout,
             params=self.test_params
         )
         mock_get_cosmos_json.reset_mock()
 
         # Test with parameters None
-        self.test_wrapper.get_block_results(self.tendermint_rpc_url)
+        self.test_wrapper.get_block_results(self.cometbft_rpc_url)
         mock_get_cosmos_json.assert_called_once_with(
-            endpoint="{}/block_results".format(self.tendermint_rpc_url),
+            endpoint="{}/block_results".format(self.cometbft_rpc_url),
             logger=self.dummy_logger, verify=self.verify, timeout=self.timeout,
             params=None
         )
 
     @mock.patch("src.api_wrappers.cosmos.get_cosmos_json")
     def test_get_status_calls_api_correctly(self, mock_get_cosmos_json) -> None:
-        self.test_wrapper.get_status(self.tendermint_rpc_url)
+        self.test_wrapper.get_status(self.cometbft_rpc_url)
         mock_get_cosmos_json.assert_called_once_with(
-            endpoint="{}/status".format(self.tendermint_rpc_url),
+            endpoint="{}/status".format(self.cometbft_rpc_url),
             logger=self.dummy_logger, verify=self.verify, timeout=self.timeout,
         )
 
@@ -266,58 +266,58 @@ class TestTendermintRpcApiWrapper(unittest.TestCase):
     def test_get_validators_calls_api_correctly(
             self, mock_get_cosmos_json) -> None:
         # First test with parameters not None
-        self.test_wrapper.get_validators(self.tendermint_rpc_url,
+        self.test_wrapper.get_validators(self.cometbft_rpc_url,
                                          self.test_params)
         mock_get_cosmos_json.assert_called_once_with(
-            endpoint="{}/validators".format(self.tendermint_rpc_url),
+            endpoint="{}/validators".format(self.cometbft_rpc_url),
             logger=self.dummy_logger, verify=self.verify, timeout=self.timeout,
             params=self.test_params
         )
         mock_get_cosmos_json.reset_mock()
 
         # Test with parameters None
-        self.test_wrapper.get_validators(self.tendermint_rpc_url)
+        self.test_wrapper.get_validators(self.cometbft_rpc_url)
         mock_get_cosmos_json.assert_called_once_with(
-            endpoint="{}/validators".format(self.tendermint_rpc_url),
+            endpoint="{}/validators".format(self.cometbft_rpc_url),
             logger=self.dummy_logger, verify=self.verify, timeout=self.timeout,
             params=None
         )
 
     """
-    To test TendermintRpcApiWrapper.execute_with_checks we will be using the
-    TendermintRpcApiWrapper.get_status function. This will not effect the
+    To test CometbftRpcApiWrapper.execute_with_checks we will be using the
+    CometbftRpcApiWrapper.get_status function. This will not effect the
     generality of the tests.
     """
 
-    @mock.patch.object(TendermintRpcApiWrapper, "get_status")
+    @mock.patch.object(CometbftRpcApiWrapper, "get_status")
     def test_execute_with_checks_returns_function_return_if_no_errors_detected(
             self, mock_get_status) -> None:
         mock_get_status.return_value = self.test_dict
         actual_ret = self.test_wrapper.execute_with_checks(
-            self.test_wrapper.get_status, [self.tendermint_rpc_url],
+            self.test_wrapper.get_status, [self.cometbft_rpc_url],
             self.node_name)
         self.assertEqual(self.test_dict, actual_ret)
 
-    @mock.patch.object(TendermintRpcApiWrapper, "get_status")
+    @mock.patch.object(CometbftRpcApiWrapper, "get_status")
     def test_execute_with_checks_raises_incompatibility_exception(
             self, mock_get_status) -> None:
         """
-        In this test we will check that a TendermintRPCIncompatibleException is
+        In this test we will check that a CometbftRPCIncompatibleException is
         raised by the function if a 404 page not found error is returned
         """
         fn_return = Response()
         fn_return.__setstate__({"status_code": 404})
         mock_get_status.return_value = fn_return
         self.assertRaises(
-            TendermintRPCIncompatibleException,
+            CometbftRPCIncompatibleException,
             self.test_wrapper.execute_with_checks, self.test_wrapper.get_status,
-            [self.tendermint_rpc_url], self.node_name)
+            [self.cometbft_rpc_url], self.node_name)
 
-    @mock.patch.object(TendermintRpcApiWrapper, "get_status")
-    def test_execute_with_checks_raises_tendermint_rpc_call_error_if_check_true(
+    @mock.patch.object(CometbftRpcApiWrapper, "get_status")
+    def test_execute_with_checks_raises_cometbft_rpc_call_error_if_check_true(
             self, mock_get_status) -> None:
         """
-        In this test we will check that a TendermintRPCCallException is raised
+        In this test we will check that a CometbftRPCCallException is raised
         by the function if {error: {message: msg, data: data, code: code}}
         """
         fn_return = {
@@ -328,6 +328,6 @@ class TestTendermintRpcApiWrapper(unittest.TestCase):
             }}
         mock_get_status.return_value = fn_return
         self.assertRaises(
-            TendermintRPCCallException, self.test_wrapper.execute_with_checks,
-            self.test_wrapper.get_status, [self.tendermint_rpc_url],
+            CometbftRPCCallException, self.test_wrapper.execute_with_checks,
+            self.test_wrapper.get_status, [self.cometbft_rpc_url],
             self.node_name)

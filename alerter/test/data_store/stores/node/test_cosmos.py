@@ -91,7 +91,7 @@ class TestCosmosNodeStore(unittest.TestCase):
         self.test_bond_status = BOND_STATUS_BONDED
         self.test_jailed = False
 
-        self.test_went_down_at_tendermint_rpc = None
+        self.test_went_down_at_cometbft_rpc = None
         self.test_slashed = {
             'slashed': True,
             'amount_map': {'40': 56.6}
@@ -104,7 +104,7 @@ class TestCosmosNodeStore(unittest.TestCase):
 
         self.test_last_monitored_prometheus = datetime(2012, 1, 1).timestamp()
         self.test_last_monitored_cosmos_rest = datetime(2012, 1, 1).timestamp()
-        self.test_last_monitored_tendermint_rpc = \
+        self.test_last_monitored_cometbft_rpc = \
             datetime(2012, 1, 1).timestamp()
         self.node_data_optionals_enabled = {
             "prometheus": {
@@ -141,19 +141,19 @@ class TestCosmosNodeStore(unittest.TestCase):
                     }
                 }
             },
-            "tendermint_rpc": {
+            "cometbft_rpc": {
                 "result": {
                     "meta_data": {
                         "node_name": self.node_name,
                         "node_id": self.node_id,
                         "node_parent_id": self.parent_id,
                         "last_monitored":
-                            self.test_last_monitored_tendermint_rpc,
+                            self.test_last_monitored_cometbft_rpc,
                         "is_validator": self.is_validator,
                         "operator_address": self.operator_address
                     },
                     "data": {
-                        "went_down_at": self.test_went_down_at_tendermint_rpc,
+                        "went_down_at": self.test_went_down_at_cometbft_rpc,
                         "slashed": self.test_slashed,
                         "missed_blocks": self.test_missed_blocks,
                         "is_syncing": self.test_is_syncing
@@ -163,7 +163,7 @@ class TestCosmosNodeStore(unittest.TestCase):
         }
         
         self.node_data_mev = copy.deepcopy(self.node_data_optionals_enabled)
-        self.node_data_mev['tendermint_rpc']['result']['data']['is_peered_with_sentinel'] = self.test_is_peered_with_sentinel
+        self.node_data_mev['cometbft_rpc']['result']['data']['is_peered_with_sentinel'] = self.test_is_peered_with_sentinel
 
         self.node_data_down_error = {
             'prometheus': {
@@ -200,7 +200,7 @@ class TestCosmosNodeStore(unittest.TestCase):
                     }
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'error': {
                     'meta_data': {
                         'node_name': self.node_name,
@@ -208,12 +208,12 @@ class TestCosmosNodeStore(unittest.TestCase):
                         'node_parent_id': self.parent_id,
                         "is_validator": self.is_validator,
                         "operator_address": self.operator_address,
-                        'time': self.test_last_monitored_tendermint_rpc
+                        'time': self.test_last_monitored_cometbft_rpc
                     },
                     'message': self.downtime_exception.message,
                     'code': self.downtime_exception.code,
                     'data': {
-                        'went_down_at': self.test_last_monitored_tendermint_rpc
+                        'went_down_at': self.test_last_monitored_cometbft_rpc
                     }
                 }
             },
@@ -248,7 +248,7 @@ class TestCosmosNodeStore(unittest.TestCase):
                     'code': self.test_exception.code
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'error': {
                     'meta_data': {
                         'node_name': self.node_name,
@@ -256,7 +256,7 @@ class TestCosmosNodeStore(unittest.TestCase):
                         'node_parent_id': self.parent_id,
                         "is_validator": self.is_validator,
                         "operator_address": self.operator_address,
-                        'time': self.test_last_monitored_tendermint_rpc
+                        'time': self.test_last_monitored_cometbft_rpc
                     },
                     'message': self.test_exception.message,
                     'code': self.test_exception.code
@@ -527,11 +527,11 @@ class TestCosmosNodeStore(unittest.TestCase):
     #             'error':
     #                 self.test_store._process_redis_prometheus_error_store,
     #         },
-    #         'tendermint_rpc': {
+    #         'cometbft_rpc': {
     #             'result':
-    #                 self.test_store._process_redis_tendermint_rpc_result_store,
+    #                 self.test_store._process_redis_cometbft_rpc_result_store,
     #             'error':
-    #                 self.test_store._process_redis_tendermint_rpc_error_store,
+    #                 self.test_store._process_redis_cometbft_rpc_error_store,
     #         },
     #         'cosmos_rest': {
     #             'result':
@@ -617,18 +617,18 @@ class TestCosmosNodeStore(unittest.TestCase):
     @parameterized.expand([
         ("self.node_data_optionals_enabled",),
     ])
-    def test_process_redis_tendermint_rpc_result_store_stores_correctly(
+    def test_process_redis_cometbft_rpc_result_store_stores_correctly(
             self, data_var) -> None:
-        data = eval(data_var)['tendermint_rpc']['result']
+        data = eval(data_var)['cometbft_rpc']['result']
         redis_hash = Keys.get_hash_parent(self.parent_id)
 
-        self.test_store._process_redis_tendermint_rpc_result_store(data)
+        self.test_store._process_redis_cometbft_rpc_result_store(data)
 
         self.assertEqual(
             data['data']['went_down_at'],
             self.redis.hget(
                 redis_hash,
-                Keys.get_cosmos_node_went_down_at_tendermint_rpc(self.node_id)
+                Keys.get_cosmos_node_went_down_at_cometbft_rpc(self.node_id)
             ))
         self.assertEqual(
             data['data']['slashed'],
@@ -652,7 +652,7 @@ class TestCosmosNodeStore(unittest.TestCase):
             data['meta_data']['last_monitored'],
             convert_to_float(self.redis.hget(
                 redis_hash,
-                Keys.get_cosmos_node_last_monitored_tendermint_rpc(self.node_id)
+                Keys.get_cosmos_node_last_monitored_cometbft_rpc(self.node_id)
             ).decode('utf-8'), 'bad_val'))
         print(self.redis.hget(
                 redis_hash,
@@ -669,12 +669,12 @@ class TestCosmosNodeStore(unittest.TestCase):
     @parameterized.expand([
         ("self.node_data_mev",),
     ])
-    def test_process_redis_tendermint_rpc_result_store_stores_mev_data_correctly(
+    def test_process_redis_cometbft_rpc_result_store_stores_mev_data_correctly(
             self, data_var) -> None:
-        data = eval(data_var)['tendermint_rpc']['result']
+        data = eval(data_var)['cometbft_rpc']['result']
         redis_hash = Keys.get_hash_parent(self.parent_id)
 
-        self.test_store._process_redis_tendermint_rpc_result_store(data)
+        self.test_store._process_redis_cometbft_rpc_result_store(data)
 
         self.assertEqual(
             data['data']['is_peered_with_sentinel'],
@@ -734,11 +734,11 @@ class TestCosmosNodeStore(unittest.TestCase):
     #             Keys.get_cosmos_node_went_down_at_cosmos_rest(self.node_id)
     #         ).decode("utf-8"), 'bad_val'))
 
-    # def test_process_redis_tendermint_rpc_error_store_stores_correctly_if_down_err(
+    # def test_process_redis_cometbft_rpc_error_store_stores_correctly_if_down_err(
     #         self) -> None:
-    #     data = self.node_data_down_error['tendermint_rpc']['error']
+    #     data = self.node_data_down_error['cometbft_rpc']['error']
     #     redis_hash = Keys.get_hash_parent(self.parent_id)
-    #     self.test_store._process_redis_tendermint_rpc_error_store(data)
+    #     self.test_store._process_redis_cometbft_rpc_error_store(data)
 
     #     self.assertEqual(
     #         None, self.redis.hget(redis_hash,
@@ -754,7 +754,7 @@ class TestCosmosNodeStore(unittest.TestCase):
     #         data['data']['went_down_at'],
     #         convert_to_float(self.redis.hget(
     #             redis_hash,
-    #             Keys.get_cosmos_node_went_down_at_tendermint_rpc(self.node_id)
+    #             Keys.get_cosmos_node_went_down_at_cometbft_rpc(self.node_id)
     #         ).decode("utf-8"), 'bad_val'))
 
     # @mock.patch.object(RedisApi, "hset_multiple")
@@ -776,11 +776,11 @@ class TestCosmosNodeStore(unittest.TestCase):
     #     redis_set.assert_not_called()
 
     # @mock.patch.object(RedisApi, "hset_multiple")
-    # def test_process_redis_tendermint_rpc_error_store_stores_correctly_not_down_err(
+    # def test_process_redis_cometbft_rpc_error_store_stores_correctly_not_down_err(
     #         self, redis_set) -> None:
-    #     data = self.node_data_non_down_error['tendermint_rpc']['error']
+    #     data = self.node_data_non_down_error['cometbft_rpc']['error']
 
-    #     self.test_store._process_redis_tendermint_rpc_error_store(data)
+    #     self.test_store._process_redis_cometbft_rpc_error_store(data)
 
     #     redis_set.assert_not_called()
 
@@ -800,11 +800,11 @@ class TestCosmosNodeStore(unittest.TestCase):
     #                 self.test_store._process_mongo_cosmos_rest_result_store,
     #             'error': self.test_store._process_mongo_cosmos_rest_error_store,
     #         },
-    #         'tendermint_rpc': {
+    #         'cometbft_rpc': {
     #             'result':
-    #                 self.test_store._process_mongo_tendermint_rpc_result_store,
+    #                 self.test_store._process_mongo_cometbft_rpc_result_store,
     #             'error':
-    #                 self.test_store._process_mongo_tendermint_rpc_error_store,
+    #                 self.test_store._process_mongo_cometbft_rpc_error_store,
     #         }
     #     }
     #     self.test_store._process_mongo_store(self.node_data_optionals_enabled)
@@ -887,15 +887,15 @@ class TestCosmosNodeStore(unittest.TestCase):
     # @parameterized.expand([
     #     ("self.node_data_optionals_enabled",),
     # ])
-    # def test_process_mongo_tendermint_rpc_result_store_stores_correctly(
+    # def test_process_mongo_cometbft_rpc_result_store_stores_correctly(
     #         self, data_var) -> None:
-    #     data = eval(data_var)['tendermint_rpc']['result']
+    #     data = eval(data_var)['cometbft_rpc']['result']
     #     meta_data = data['meta_data']
     #     node_id = meta_data['node_id']
     #     parent_id = meta_data['node_parent_id']
     #     metrics = data['data']
 
-    #     self.test_store._process_mongo_tendermint_rpc_result_store(data)
+    #     self.test_store._process_mongo_cometbft_rpc_result_store(data)
 
     #     documents = self.mongo.get_all(parent_id)
     #     document = documents[0]
@@ -912,9 +912,9 @@ class TestCosmosNodeStore(unittest.TestCase):
     #         document['doc_type'],
     #         document['n_entries'],
     #         None if document[node_id][0][
-    #                     'went_down_at_tendermint_rpc'] == 'None'
+    #                     'went_down_at_cometbft_rpc'] == 'None'
     #         else convert_to_float(
-    #             document[node_id][0]['went_down_at_tendermint_rpc'], 'bad_val'),
+    #             document[node_id][0]['went_down_at_cometbft_rpc'], 'bad_val'),
     #         None if document[node_id][0]['slashed'] == 'None'
     #         else json.loads(document[node_id][0]['slashed']),
     #         None if document[node_id][0]['missed_blocks'] == 'None'
@@ -983,7 +983,7 @@ class TestCosmosNodeStore(unittest.TestCase):
     #     self.assertEqual(2, len(document[node_id][0]))
     #     self.assertListEqual(expected, actual)
 
-    # def test_process_mongo_tendermint_rpc_error_store_stores_correctly_if_down_err(
+    # def test_process_mongo_cometbft_rpc_error_store_stores_correctly_if_down_err(
     #         self) -> None:
     #     data = self.node_data_down_error['prometheus']['error']
     #     meta_data = data['meta_data']
@@ -991,7 +991,7 @@ class TestCosmosNodeStore(unittest.TestCase):
     #     parent_id = meta_data['node_parent_id']
     #     metrics = data['data']
 
-    #     self.test_store._process_mongo_tendermint_rpc_error_store(data)
+    #     self.test_store._process_mongo_cometbft_rpc_error_store(data)
 
     #     documents = self.mongo.get_all(parent_id)
     #     document = documents[0]
@@ -1005,7 +1005,7 @@ class TestCosmosNodeStore(unittest.TestCase):
     #         document['doc_type'],
     #         document['n_entries'],
     #         convert_to_float(
-    #             document[node_id][0]['went_down_at_tendermint_rpc'],
+    #             document[node_id][0]['went_down_at_cometbft_rpc'],
     #             'bad_val'),
     #         document[node_id][0]['timestamp'],
     #     ]
@@ -1032,10 +1032,10 @@ class TestCosmosNodeStore(unittest.TestCase):
     #     mongo_update.assert_not_called()
 
     # @mock.patch.object(MongoApi, "update_one")
-    # def test_process_mongo_tendermint_rpc_error_store_stores_correctly_non_down_err(
+    # def test_process_mongo_cometbft_rpc_error_store_stores_correctly_non_down_err(
     #         self, mongo_update) -> None:
-    #     data = self.node_data_non_down_error['tendermint_rpc']['error']
+    #     data = self.node_data_non_down_error['cometbft_rpc']['error']
 
-    #     self.test_store._process_mongo_tendermint_rpc_error_store(data)
+    #     self.test_store._process_mongo_cometbft_rpc_error_store(data)
 
     #     mongo_update.assert_not_called()

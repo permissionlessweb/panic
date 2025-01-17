@@ -253,9 +253,9 @@
     },
     {
         "_id": "62e23a55f161ba55e6db29f4",
-        "name": "Cannot access Tendermint RPC for Validator",
-        "value": "cannot_access_tendermint_rpc_validator",
-        "description": "The Tendermint RPC for a validator has not been accessible for some time.",
+        "name": "Cannot access Cometbft RPC for Validator",
+        "value": "cannot_access_cometbft_rpc_validator",
+        "description": "The Cometbft RPC for a validator has not been accessible for some time.",
         "adornment": "%",
         "group": "threshold_alert",
         "critical": {
@@ -271,9 +271,9 @@
     },
     {
         "_id": "62e23a65f161ba55e6db29f5",
-        "name": "Cannot access Tendermint RPC for Node",
-        "value": "cannot_access_tendermint_rpc_node",
-        "description": "The Tendermint RPC for a node has not been accessible for some time.",
+        "name": "Cannot access Cometbft RPC for Node",
+        "value": "cannot_access_cometbft_rpc_node",
+        "description": "The Cometbft RPC for a node has not been accessible for some time.",
         "adornment": "%",
         "group": "threshold_alert",
         "critical": {

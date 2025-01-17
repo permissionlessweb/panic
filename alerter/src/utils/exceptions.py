@@ -216,7 +216,7 @@ class CosmosRestServerDataCouldNotBeObtained(PANICException):
     def __init__(self, node_name: str) -> None:
         message = (
             "PANIC cannot obtain Rest data for {} either due to Cosmos SDK or "
-            "Tendermint incompatibility issues in the node used as data "
+            "Cometbft incompatibility issues in the node used as data "
             "source. Please check the logs of {} to detect which node is "
             "incompatible and disable it from being a data source. If no "
             "other compatible data source can be given (not even {}), please "
@@ -259,7 +259,7 @@ class CosmosNetworkDataCouldNotBeObtained(PANICException):
     def __init__(self) -> None:
         message = (
             "PANIC cannot obtain network data from COSMOS Rest Server either "
-            "due to Cosmos SDK or Tendermint incompatibility issues in the "
+            "due to Cosmos SDK or Cometbft incompatibility issues in the "
             "nodes used as data sources. Please check the logs to detect which "
             "nodes are incompatible and disable them from being a data source. "
             "If no other compatible data source can be given, please disable "
@@ -268,38 +268,38 @@ class CosmosNetworkDataCouldNotBeObtained(PANICException):
         super().__init__(message, self.code)
 
 
-class TendermintRPCIncompatibleException(PANICException):
+class CometbftRPCIncompatibleException(PANICException):
     code = 5028
 
     def __init__(self, node_name: str) -> None:
         message = (
-            "The Tendermint RPC version of node {} is not compatible with "
+            "The Cometbft RPC version of node {} is not compatible with "
             "PANIC".format(node_name)
         )
         super().__init__(message, self.code)
 
 
-class TendermintRPCDataCouldNotBeObtained(PANICException):
+class CometbftRPCDataCouldNotBeObtained(PANICException):
     code = 5029
 
     def __init__(self, node_name: str) -> None:
         message = (
-            "PANIC cannot obtain Tendermint RPC data for {} either due to "
-            "Tendermint or Tendermint RPC incompatibility issues in the node "
+            "PANIC cannot obtain Cometbft RPC data for {} either due to "
+            "Cometbft or Cometbft RPC incompatibility issues in the node "
             "used as data source. Please check the logs of {} to detect which "
             "node is incompatible and disable it from being a data source. If "
             "no other compatible data source can be given (not even {}), "
-            "please disable Tendermint RPC monitoring altogether for "
+            "please disable Cometbft RPC monitoring altogether for "
             "{}.".format(node_name, node_name, node_name, node_name)
         )
         super().__init__(message, self.code)
 
 
-class TendermintRPCCallException(PANICException):
+class CometbftRPCCallException(PANICException):
     code = 5030
 
     def __init__(self, api_call: str, error_message: str) -> None:
-        message = "Tendermint RPC call {} failed. Error: {}".format(
+        message = "Cometbft RPC call {} failed. Error: {}".format(
             api_call, error_message)
         super().__init__(message, self.code)
 

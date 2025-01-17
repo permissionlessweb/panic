@@ -30,24 +30,24 @@ from src.utils.exceptions import (
     CosmosSDKVersionIncompatibleException, CosmosRestServerApiCallException,
     IncorrectJSONRetrievedException, NoSyncedDataSourceWasAccessibleException,
     CannotConnectWithDataSourceException,
-    CosmosRestServerDataCouldNotBeObtained, TendermintRPCCallException,
-    TendermintRPCIncompatibleException, TendermintRPCDataCouldNotBeObtained)
+    CosmosRestServerDataCouldNotBeObtained, CometbftRPCCallException,
+    CometbftRPCIncompatibleException, CometbftRPCDataCouldNotBeObtained)
 
 
 class CosmosNodeMonitor(CosmosMonitor):
     """
     The node monitor supports the retrieval of prometheus, Cosmos Rest Server
-    and Tendermint RPC data. In the case of the Rest Server, v0.42.6 and v0.39.2
+    and Cometbft RPC data. In the case of the Rest Server, v0.42.6 and v0.39.2
     of the Cosmos SDK are directly supported. If a node or data source has a
     different Cosmos SDK version, the monitor attempts to retrieve the data
     using all the supported versions just in case that version is still
     compatible, however, this might result into unexpected behaviour.
 
     Note that different chains might also carry different versions of
-    Tendermint, resulting in different structures in the data retrieved. This
+    Cometbft, resulting in different structures in the data retrieved. This
     must also be catered with in the implemented data retrievals. In
-    development, only Tendermint versions for the latest Cosmos SDK chains were
-    considered. The Tendermint versions used by the latest Cosmos SDK chains
+    development, only Cometbft versions for the latest Cosmos SDK chains were
+    considered. The Cometbft versions used by the latest Cosmos SDK chains
     considered were v0.33.7, v0.33.8, v0.33.9, v0.34.11, v0.34.12, v0.34.14.
     """
 
@@ -83,20 +83,20 @@ class CosmosNodeMonitor(CosmosMonitor):
         ]
 
         # --------------------------- PROMETHEUS -------------------------------
-        # tendermint_consensus_validator_power needs to be set as optional
+        # cometbft_consensus_validator_power needs to be set as optional
         # because it is non-existent for nodes which are not in the validator
         # set.
         self._prometheus_metrics = {
-            'tendermint_consensus_latest_block_height': 'strict',
-            'tendermint_consensus_validator_power': 'optional',
+            'cometbft_consensus_latest_block_height': 'strict',
+            'cometbft_consensus_validator_power': 'optional',
         }
 
         # -------------------------- TENDERMINT RPC ---------------------------
         # This will store the last height that the monitor queried when
-        # retrieving historical data from tendermint RPC
-        self._last_height_monitored_tendermint = None
+        # retrieving historical data from cometbft RPC
+        self._last_height_monitored_cometbft = None
 
-        # This will be obtained directly from the Tendermint RPC interface of
+        # This will be obtained directly from the Cometbft RPC interface of
         # the node at each monitoring round if it is a validator
         self._validator_consensus_address = None
 
@@ -121,8 +121,8 @@ class CosmosNodeMonitor(CosmosMonitor):
         return self._prometheus_metrics
 
     @property
-    def last_height_monitored_tendermint(self) -> Optional[int]:
-        return self._last_height_monitored_tendermint
+    def last_height_monitored_cometbft(self) -> Optional[int]:
+        return self._last_height_monitored_cometbft
 
     @property
     def validator_consensus_address(self) -> Optional[str]:
@@ -170,7 +170,7 @@ class CosmosNodeMonitor(CosmosMonitor):
                  a valid schema
                : IncorrectJSONRetrievedException if the structure of the data
                  returned by the endpoints is not as expected. This could be
-                 both due to Tendermint or a Cosmos SDK update
+                 both due to Cometbft or a Cosmos SDK update
         """
         operator_address = self.node_config.operator_address
         source_url = source.cosmos_rest_url
@@ -221,7 +221,7 @@ class CosmosNodeMonitor(CosmosMonitor):
                  a valid schema
                : IncorrectJSONRetrievedException if the structure of the data
                  returned by the endpoints is not as expected. This could be
-                 both due to a Tendermint or Cosmos SDK update
+                 both due to a Cometbft or Cosmos SDK update
         """
         operator_address = self.node_config.operator_address
         source_url = source.cosmos_rest_url
@@ -230,7 +230,7 @@ class CosmosNodeMonitor(CosmosMonitor):
         def retrieval_process() -> Dict:
             staking_validators = \
                 self.cosmos_rest_server_api.execute_with_checks(
-                    self.cosmos_rest_server_api.get_staking_validators_v0_42_6,
+                    self.cosmos_rest_server_api.get_staking_validators,
                     [source_url, operator_address, {}], source_name,
                     _REST_VERSION_COSMOS_SDK_0_42_6)
             bond_status = self._parse_validator_status(
@@ -366,7 +366,7 @@ class CosmosNodeMonitor(CosmosMonitor):
         retrieval_fn = supported_retrievals[self.last_rest_retrieval_version]
         data, data_retrieval_failed, data_retrieval_exception = retrieval_fn()
 
-        # If an exception related to Tendermint or Cosmos SDK version
+        # If an exception related to Cometbft or Cosmos SDK version
         # incompatibility is raised, we attempt to retrieve the data using other
         # supported versions. Start by removing the retrieval which we already
         # performed and iterate one by one until successful
@@ -395,30 +395,30 @@ class CosmosNodeMonitor(CosmosMonitor):
             (data, data_retrieval_failed, data_retrieval_exception))
         return data, data_retrieval_failed, data_retrieval_exception
 
-    def _get_tendermint_rpc_direct_data(self) -> Dict:
+    def _get_cometbft_rpc_direct_data(self) -> Dict:
         """
         This function retrieves node specific metrics directly from the node
         being monitored. This data is obtained directly from the node as it
         cannot be obtained otherwise.
         :return: A dict containing all direct metrics
-        :raises: TendermintRPCIncompatibleException if the Tendermint RPC
+        :raises: CometbftRPCIncompatibleException if the Cometbft RPC
                : version of the node is not compatible with PANIC
-               : TendermintRPCCallException if an API call errors
+               : CometbftRPCCallException if an API call errors
                : DataReadingException if data cannot be read from the node
                : NodeIsDownException if the node cannot be accessed at the
-                 tendermint rpc endpoint
+                 cometbft rpc endpoint
                : InvalidUrlException if the URL of the node does not have a
                  valid schema
                : IncorrectJSONRetrievedException if the structure of the data
                  returned by the endpoints is not as expected. This could be
-                 both due to Tendermint RPC or Tendermint update.
+                 both due to Cometbft RPC or Cometbft update.
         """
-        node_url = self.node_config.tendermint_rpc_url
+        node_url = self.node_config.cometbft_rpc_url
         node_name = self.node_config.node_name
 
         def retrieval_process() -> Dict:
-            status = self.tendermint_rpc_api.execute_with_checks(
-                self.tendermint_rpc_api.get_status, [node_url], node_name)
+            status = self.cometbft_rpc_api.execute_with_checks(
+                self.cometbft_rpc_api.get_status, [node_url], node_name)
             ## check if mev_info is present in response
             if 'mev_info' not in status['result']:
                 return {
@@ -435,26 +435,26 @@ class CosmosNodeMonitor(CosmosMonitor):
                 'is_peered_with_sentinel' : status['result']['mev_info']['is_peered_with_relayer'],
             }
 
-        return self._execute_cosmos_tendermint_retrieval_with_exceptions(
+        return self._execute_cosmos_cometbft_retrieval_with_exceptions(
             retrieval_process, node_name, node_url, True)
 
-    def _determine_last_height_monitored_tendermint(
+    def _determine_last_height_monitored_cometbft(
             self, current_last_height: int, current_height: int,
             is_source_archive: bool) -> int:
         """
-        This function checks whether last_height_monitored_tendermint satisfies
+        This function checks whether last_height_monitored_cometbft satisfies
         some conditions in order to determine its correct value for the upcoming
         monitoring round. These conditions are based on the current height of
         the chain and whether the source node is archive or not.
-        NOTE: This check must be done before retrieving any archive Tendermint
+        NOTE: This check must be done before retrieving any archive Cometbft
               RPC data.
         :param current_last_height:
-        The value of self._last_height_monitored_tendermint
+        The value of self._last_height_monitored_cometbft
         :param current_height:
         The current height of the chain
         :param is_source_archive:
         If the source being used is an archive node or not
-        :return: The value of last_height_monitored_tendermint to be used in the
+        :return: The value of last_height_monitored_cometbft to be used in the
                  upcoming monitoring round
         """
         if current_last_height is None:
@@ -471,7 +471,7 @@ class CosmosNodeMonitor(CosmosMonitor):
             # If the monitor is not keeping up with the chain and the data
             # source is not archive, skip some blocks keeping in mind the
             # pruning state of the node. Note that we performed + 1 because for
-            # Tendermint RPC data retrieval we are checking the block signatures
+            # Cometbft RPC data retrieval we are checking the block signatures
             # in a block, where these belong to the parent block. Due to this
             # fact we need to make sure that the state of the previous block is
             # not pruned.
@@ -498,7 +498,7 @@ class CosmosNodeMonitor(CosmosMonitor):
         Given a list of validators, this function will check if the validator
         being monitored is active
         :param validators: List of validators obtained from
-                           TendermintRpcApi.get_validators
+                           CometbftRpcApi.get_validators
         :return: True if validator is in the list
                : False otherwise
         """
@@ -517,11 +517,11 @@ class CosmosNodeMonitor(CosmosMonitor):
             bool, Optional[float]):
         """
         Given the begin_block_events returned by the
-        TendermintRpcApi.get_block_results endpoint, this functions returns
+        CometbftRpcApi.get_block_results endpoint, this functions returns
         whether the validator was slashed or not, and the slashed amount if
         available.
         :param begin_block_events: The begin_block_events returned by the
-        TendermintRpcApi.get_block_results endpoint
+        CometbftRpcApi.get_block_results endpoint
         :return: (True, None) If validator was slashed but no slashing amount
                  is available
                  (True, int) If validator was slashed and a slashing amount >= 0
@@ -565,9 +565,9 @@ class CosmosNodeMonitor(CosmosMonitor):
 
         return slashed, slashed_amount
 
-    def _get_tendermint_rpc_archive_data_validator(
+    def _get_cometbft_rpc_archive_data_validator(
             self, source: CosmosNodeConfig) -> Dict:
-        source_url = source.tendermint_rpc_url
+        source_url = source.cometbft_rpc_url
         source_name = source.node_name
 
         def retrieval_process() -> Dict:
@@ -578,16 +578,16 @@ class CosmosNodeMonitor(CosmosMonitor):
             :return: List of metrics
             """
             latest_block = \
-                self.tendermint_rpc_api.execute_with_checks(
-                    self.tendermint_rpc_api.get_block, [source_url],
+                self.cometbft_rpc_api.execute_with_checks(
+                    self.cometbft_rpc_api.get_block, [source_url],
                     source_name)
             current_height = int(latest_block['result']['block']['header'][
                                      'height'])
-            self._last_height_monitored_tendermint = \
-                self._determine_last_height_monitored_tendermint(
-                    self.last_height_monitored_tendermint, current_height,
+            self._last_height_monitored_cometbft = \
+                self._determine_last_height_monitored_cometbft(
+                    self.last_height_monitored_cometbft, current_height,
                     source.is_archive_node)
-            starting_height = self.last_height_monitored_tendermint + 1
+            starting_height = self.last_height_monitored_cometbft + 1
             stopping_height = current_height + 1
             historical_data = []
 
@@ -596,24 +596,24 @@ class CosmosNodeMonitor(CosmosMonitor):
                 # previous block, we must first check if the validator was
                 # active in the previous block
                 paginated_validators = \
-                    self._get_tendermint_data_with_count(
-                        self.tendermint_rpc_api.get_validators, [source_url],
+                    self._get_cometbft_data_with_count(
+                        self.cometbft_rpc_api.get_validators, [source_url],
                         {'height': height_to_monitor - 1}, source_name)
                 validators_list = self._parse_validators_list(
                     paginated_validators)
                 validator_was_active = self._is_validator_active(
                     validators_list)
                 block_at_height = \
-                    self.tendermint_rpc_api.execute_with_checks(
-                        self.tendermint_rpc_api.get_block,
+                    self.cometbft_rpc_api.execute_with_checks(
+                        self.cometbft_rpc_api.get_block,
                         [source_url, {'height': height_to_monitor}],
                         source_name)
 
                 # Check if the validator was slashed and get the slash amount
                 # if it is provided
                 block_results_at_height = \
-                    self.tendermint_rpc_api.execute_with_checks(
-                        self.tendermint_rpc_api.get_block_results,
+                    self.cometbft_rpc_api.execute_with_checks(
+                        self.cometbft_rpc_api.get_block_results,
                         [source_url, {'height': height_to_monitor}],
                         source_name)
                 slashed, slashed_amount = self._validator_was_slashed(
@@ -646,41 +646,41 @@ class CosmosNodeMonitor(CosmosMonitor):
                         'slashed_amount': slashed_amount
                     })
 
-            self._last_height_monitored_tendermint = current_height
+            self._last_height_monitored_cometbft = current_height
 
             # We need to reverse the historical data to show info about the
             # latest block first
             historical_data.reverse()
             return {'historical': historical_data}
 
-        return self._execute_cosmos_tendermint_retrieval_with_exceptions(
+        return self._execute_cosmos_cometbft_retrieval_with_exceptions(
             retrieval_process, source_name, source_url, False)
 
-    def _get_tendermint_rpc_archive_data(self,
+    def _get_cometbft_rpc_archive_data(self,
                                          source: CosmosNodeConfig) -> Dict:
         """
-        This function returns the Tendermint RPC archive metrics of the node
+        This function returns the Cometbft RPC archive metrics of the node
         depending on whether the node is a validator or a non-validator.
         NOTE: If the node is a non-validator, then default data is returned.
         :param source: The data source
-        :return: The Tendermint RPC archive metrics
+        :return: The Cometbft RPC archive metrics
         """
-        source_url = source.tendermint_rpc_url
+        source_url = source.cometbft_rpc_url
         if not source_url:
             return {
                 'historical': None,
             }
 
         if self.node_config.is_validator:
-            return self._get_tendermint_rpc_archive_data_validator(source)
+            return self._get_cometbft_rpc_archive_data_validator(source)
 
         return {
             'historical': []
         }
 
-    def _get_tendermint_rpc_data(self) -> (Dict, bool, Optional[Exception]):
+    def _get_cometbft_rpc_data(self) -> (Dict, bool, Optional[Exception]):
         """
-        This function attempts to retrieve the Tendermint RPC metrics.
+        This function attempts to retrieve the Cometbft RPC metrics.
         :return: If data retrieval successful :
                  ({archive_data}, False, None)
                : If expected error raised while retrieving data:
@@ -689,11 +689,11 @@ class CosmosNodeMonitor(CosmosMonitor):
         try:
             # First get the data directly. This is done so that the consensus
             # address is saved and to check that the node is accessible.
-            direct_data = self._get_tendermint_rpc_direct_data()
+            direct_data = self._get_cometbft_rpc_direct_data()
             if direct_data['consensus_hex_address'] not in ['', None]:
                 self._validator_consensus_address = direct_data[
                     'consensus_hex_address']
-                ## If the node is running mev-tendermint add the is_peered_with_sentinel field
+                ## If the node is running mev-cometbft add the is_peered_with_sentinel field
                 if 'is_peered_with_sentinel' in direct_data:
                     direct_data = {'is_syncing': direct_data['is_syncing'],
                                    'is_peered_with_sentinel':
@@ -704,24 +704,24 @@ class CosmosNodeMonitor(CosmosMonitor):
             # Select archive node for archive data retrieval. If no archive
             # node is accessible, or given by the user, try getting data with
             # an indirect node just in case.
-            selected_node = self._select_cosmos_tendermint_node(
+            selected_node = self._select_cosmos_cometbft_node(
                 self.archive_nodes)
             if selected_node is None:
-                selected_node = self._select_cosmos_tendermint_node(
+                selected_node = self._select_cosmos_cometbft_node(
                     self.data_sources)
                 if selected_node is None:
                     self.logger.error(
-                        'No synced archive/indirect Tendermint RPC data source '
+                        'No synced archive/indirect Cometbft RPC data source '
                         'was accessible.')
                     return {}, True, NoSyncedDataSourceWasAccessibleException(
                         self.monitor_name,
-                        'archive/indirect Tendermint RPC node')
+                        'archive/indirect Cometbft RPC node')
 
-            archive_data = self._get_tendermint_rpc_archive_data(selected_node)
+            archive_data = self._get_cometbft_rpc_archive_data(selected_node)
             self.logger.debug((archive_data, False, None))
             return {**direct_data, **archive_data}, False, None
 
-        except (TendermintRPCCallException, TendermintRPCIncompatibleException,
+        except (CometbftRPCCallException, CometbftRPCIncompatibleException,
                 DataReadingException, NodeIsDownException, InvalidUrlException,
                 IncorrectJSONRetrievedException,
                 CannotConnectWithDataSourceException) as e:
@@ -729,9 +729,9 @@ class CosmosNodeMonitor(CosmosMonitor):
                 # If we have an incompatibility issue raise a more meaningful
                 # error
                 self.logger.error(
-                    'Tendermint RPC data could not be obtained for {}'.format(
+                    'Cometbft RPC data could not be obtained for {}'.format(
                         self.node_config.node_name))
-                return {}, True, TendermintRPCDataCouldNotBeObtained(
+                return {}, True, CometbftRPCDataCouldNotBeObtained(
                     self.node_config.node_name)
 
             self.logger.debug(({}, True, e))
@@ -813,14 +813,14 @@ class CosmosNodeMonitor(CosmosMonitor):
                 'processing_function': self._process_retrieved_cosmos_rest_data,
                 'monitoring_enabled': self.node_config.monitor_cosmos_rest
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'data': {},
                 'data_retrieval_failed': True,
                 'data_retrieval_exception': None,
-                'get_function': self._get_tendermint_rpc_data,
+                'get_function': self._get_cometbft_rpc_data,
                 'processing_function':
-                    self._process_retrieved_tendermint_rpc_data,
-                'monitoring_enabled': self.node_config.monitor_tendermint_rpc
+                    self._process_retrieved_cometbft_rpc_data,
+                'monitoring_enabled': self.node_config.monitor_cometbft_rpc
             }
         }
 
@@ -882,10 +882,10 @@ class CosmosNodeMonitor(CosmosMonitor):
 
         return processed_data
 
-    def _process_retrieved_tendermint_rpc_data(self, data: Dict) -> Dict:
+    def _process_retrieved_cometbft_rpc_data(self, data: Dict) -> Dict:
         """
-        This function attempts to process the retrieved Tendermint RPC data.
-        :param data: The retrieved Tendermint RPC data
+        This function attempts to process the retrieved Cometbft RPC data.
+        :param data: The retrieved Cometbft RPC data
         :return: A dict with the retrieved data together with some meta-data
         """
         # Add some meta-data to the processed data
@@ -897,7 +897,7 @@ class CosmosNodeMonitor(CosmosMonitor):
                     'node_id': self.node_config.node_id,
                     'node_parent_id': self.node_config.parent_id,
                     'time': datetime.now().timestamp(),
-                    'is_mev_tendermint_node': 'is_peered_with_sentinel' in data,
+                    'is_mev_cometbft_node': 'is_peered_with_sentinel' in data,
                     'is_validator': self.node_config.is_validator,
                     'operator_address': self.node_config.operator_address,
                 },
@@ -938,8 +938,8 @@ class CosmosNodeMonitor(CosmosMonitor):
         # were set to be optional, so first we need to check if the value is
         # None.
         one_value_subset_metrics = [
-            'tendermint_consensus_latest_block_height',
-            'tendermint_consensus_validator_power',
+            'cometbft_consensus_latest_block_height',
+            'cometbft_consensus_validator_power',
         ]
         for metric in one_value_subset_metrics:
             value = None
@@ -950,17 +950,17 @@ class CosmosNodeMonitor(CosmosMonitor):
             self.logger.debug("%s %s: %s", self.node_config, metric, value)
             processed_data['result']['data'][metric] = value
 
-        # If the tendermint_consensus_validator_power is None it means that the
+        # If the cometbft_consensus_validator_power is None it means that the
         # metric could not be obtained, hence the node is not in the validator
         # set. This means that we can set the metric to 0 as the node has no
         # voting power.
         voting_power = processed_data['result']['data'][
-            'tendermint_consensus_validator_power']
+            'cometbft_consensus_validator_power']
         if voting_power is None:
             self.logger.debug("%s %s converted to %s", self.node_config,
-                              'tendermint_consensus_validator_power', 0)
+                              'cometbft_consensus_validator_power', 0)
             processed_data['result']['data'][
-                'tendermint_consensus_validator_power'] = 0
+                'cometbft_consensus_validator_power'] = 0
 
         return processed_data
 

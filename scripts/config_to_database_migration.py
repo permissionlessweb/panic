@@ -16,8 +16,8 @@ COSMOS_NODE_FIELDS = [('parent_id', 'str'), ('name', 'str'),
                       ('use_as_data_source', 'bool'),
                       ('monitor_network', 'bool'),
                       ('operator_address', 'str'),
-                      ('monitor_tendermint_rpc', 'bool'),
-                      ('tendermint_rpc_url', 'str')]
+                      ('monitor_cometbft_rpc', 'bool'),
+                      ('cometbft_rpc_url', 'str')]
 CHAINLINK_NODE_FIELDS = [('parent_id', 'str'), ('name', 'str'),
                          ('node_prometheus_urls', 'str'),
                          ('monitor_prometheus', 'bool'),

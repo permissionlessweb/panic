@@ -41,8 +41,8 @@ export default {
       Node Exporter on it.`,
     nameHolder: 'cosmos_node_1(IP)',
     nameTip: 'This unique identifier will be used to identify your node.',
-    tendermintHolder: 'http://IP:26657',
-    tendermintTip: `This IP address will be used to monitor tendermint based
+    cometbftHolder: 'http://IP:26657',
+    cometbftTip: `This IP address will be used to monitor cometbft based
       statistics, if omitted they will not be monitored and alerted on.`,
     sdkHolder: 'http://IP:1317',
     sdkTip: `This endpoint is used to obtain validator metrics using Cosmos-Rest, namely jailed and bond statuses.
@@ -67,9 +67,9 @@ export default {
     operatorAddressTip: 'This is the validator address of the node you are monitoring.',
     backStep: CHAINS_STEP,
     nextStep: REPOSITORIES_STEP,
-    tendermintRpcHolder: 'http://nodeip:26657',
-    tendermintRpcTip: `This IP address will be used to obtain metrics from the
-    Tendermint endpoint. If ommitted they wil not be monitored and alerted on`,
+    cometbftRpcHolder: 'http://nodeip:26657',
+    cometbftRpcTip: `This IP address will be used to obtain metrics from the
+    Cometbft endpoint. If ommitted they wil not be monitored and alerted on`,
   },
   monitorNodesForm: {
     description: `Do you want to retrieve network metrics for <chain_name>?
@@ -82,13 +82,13 @@ export default {
       whenever there is a new release for the monitored repo.
       You must enter the path of the repository with a trailing
       forward slash, so if you want to monitor
-      https://github.com/tendermint/tendermint/ you will need to
-      enter tendermint/tendermint/ into the field below. The default
+      https://github.com/cometbft/cometbft/ you will need to
+      enter cometbft/cometbft/ into the field below. The default
       monitoring period of the GitHub API is 1 hour.`,
-    nameHolder: 'tendermint/tendermint/',
+    nameHolder: 'cometbft/cometbft/',
     nameTip: `This is the path of the repository that will be monitored. E.g:
-      If the full URL is https://github.com/tendermint/tendermint/ then you
-      have to enter tendermint/tendermint/.`,
+      If the full URL is https://github.com/cometbft/cometbft/ then you
+      have to enter cometbft/cometbft/.`,
     monitorTip: 'Set True if you want to monitor this repository.',
     backStep: NODES_STEP,
     nextStep: DOCKER_STEP,

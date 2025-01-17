@@ -49,7 +49,7 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
         self.dummy_logger.disabled = True
         self.invalid_transformed_data = {'bad_key': 'bad_value'}
         self.test_monitor_name = 'test_monitor_name'
-        self.test_is_mev_tendermint_node = False
+        self.test_is_mev_cometbft_node = False
 
         # Rabbit instance
         self.connection_check_time_interval = timedelta(seconds=0)
@@ -96,7 +96,7 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                 'missed_heights': [4498, 4497]
             }
         )
-        self.node_1.set_last_monitored_tendermint_rpc(self.test_last_monitored)
+        self.node_1.set_last_monitored_cometbft_rpc(self.test_last_monitored)
         self.node_1.set_last_monitored_cosmos_rest(self.test_last_monitored)
         self.node_1.set_last_monitored_prometheus(self.test_last_monitored)
 
@@ -114,8 +114,8 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                         'operator_address': self.test_operator_address,
                     },
                     'data': {
-                        'tendermint_consensus_latest_block_height': 10000.0,
-                        'tendermint_consensus_validator_power': 345456.0,
+                        'cometbft_consensus_latest_block_height': 10000.0,
+                        'cometbft_consensus_validator_power': 345456.0,
                     },
                 }
             },
@@ -136,7 +136,7 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                     },
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'result': {
                     'meta_data': {
                         'monitor_name': self.test_monitor_name,
@@ -144,7 +144,7 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                         'node_id': self.node_1.node_id,
                         'node_parent_id': self.node_1.parent_id,
                         'time': self.test_last_monitored,
-                        'is_mev_tendermint_node': self.test_is_mev_tendermint_node,
+                        'is_mev_cometbft_node': self.test_is_mev_cometbft_node,
                         'is_validator': self.test_is_validator,
                         'operator_address': self.test_operator_address,
                     },
@@ -180,16 +180,16 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
 
         self.raw_data_example_result_mev = copy.deepcopy(
             self.raw_data_example_result_all)
-        self.raw_data_example_result_mev['tendermint_rpc']['result']['data']['is_peered_with_sentinel'] = True
-        self.raw_data_example_result_mev['tendermint_rpc']['result']['meta_data']['is_mev_tendermint_node'] = True
+        self.raw_data_example_result_mev['cometbft_rpc']['result']['data']['is_peered_with_sentinel'] = True
+        self.raw_data_example_result_mev['cometbft_rpc']['result']['meta_data']['is_mev_cometbft_node'] = True
 
         self.raw_data_example_result_options_None = copy.deepcopy(
             self.raw_data_example_result_all)
         self.raw_data_example_result_options_None['prometheus'][
-            'result']['data']['tendermint_consensus_validator_power'] = None
-        self.raw_data_example_result_options_None['tendermint_rpc']['result'][
+            'result']['data']['cometbft_consensus_validator_power'] = None
+        self.raw_data_example_result_options_None['cometbft_rpc']['result'][
             'data']['historical'] = None
-        self.raw_data_example_result_options_None['tendermint_rpc']['result'][
+        self.raw_data_example_result_options_None['cometbft_rpc']['result'][
             'data']['is_syncing'] = None
         self.raw_data_example_result_options_None['cosmos_rest']['result'][
             'data']['bond_status'] = None
@@ -226,7 +226,7 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                     'code': self.test_exception.code,
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'error': {
                     'meta_data': {
                         'monitor_name': self.test_monitor_name,
@@ -234,7 +234,7 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                         'node_id': self.node_1.node_id,
                         'node_parent_id': self.node_1.parent_id,
                         'time': self.test_last_monitored,
-                        'is_mev_tendermint_node': self.test_is_mev_tendermint_node,
+                        'is_mev_cometbft_node': self.test_is_mev_cometbft_node,
                         'is_validator': self.test_is_validator,
                         'operator_address': self.test_operator_address,
                     },
@@ -274,7 +274,7 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                     'code': self.test_node_is_down_exception.code,
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'error': {
                     'meta_data': {
                         'monitor_name': self.test_monitor_name,
@@ -282,7 +282,7 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                         'node_id': self.node_1.node_id,
                         'node_parent_id': self.node_1.parent_id,
                         'time': self.test_last_monitored,
-                        'is_mev_tendermint_node': self.test_is_mev_tendermint_node,
+                        'is_mev_cometbft_node': self.test_is_mev_cometbft_node,
                         'is_validator': self.test_is_validator,
                         'operator_address': self.test_operator_address,
                     },
@@ -328,14 +328,14 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                     },
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'result': {
                     'meta_data': {
                         'node_name': self.node_1.node_name,
                         'node_id': self.node_1.node_id,
                         'node_parent_id': self.node_1.parent_id,
                         'last_monitored': self.test_last_monitored,
-                        'is_mev_tendermint_node': self.test_is_mev_tendermint_node,
+                        'is_mev_cometbft_node': self.test_is_mev_cometbft_node,
                         'is_validator': self.test_is_validator,
                         'operator_address': self.test_operator_address,
                     },
@@ -360,25 +360,25 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
         }
         self.transformed_data_example_result_mev = copy.deepcopy(
             self.transformed_data_example_result_all)
-        self.transformed_data_example_result_mev['tendermint_rpc']['result']['data']['is_peered_with_sentinel'] = True
-        self.transformed_data_example_result_mev['tendermint_rpc']['result']['meta_data']['is_mev_tendermint_node'] = True
+        self.transformed_data_example_result_mev['cometbft_rpc']['result']['data']['is_peered_with_sentinel'] = True
+        self.transformed_data_example_result_mev['cometbft_rpc']['result']['meta_data']['is_mev_cometbft_node'] = True
 
 
         self.transformed_data_example_result_options_None = copy.deepcopy(
             self.transformed_data_example_result_all)
         self.transformed_data_example_result_options_None['prometheus'][
             'result']['data']['voting_power'] = None
-        self.transformed_data_example_result_options_None['tendermint_rpc'][
+        self.transformed_data_example_result_options_None['cometbft_rpc'][
             'result']['data']['slashed'] = {
             'slashed': False,
             'amount_map': {}
         }
-        self.transformed_data_example_result_options_None['tendermint_rpc'][
+        self.transformed_data_example_result_options_None['cometbft_rpc'][
             'result']['data']['missed_blocks'] = {
             'total_count': 0,
             'missed_heights': []
         }
-        self.transformed_data_example_result_options_None['tendermint_rpc'][
+        self.transformed_data_example_result_options_None['cometbft_rpc'][
             'result']['data']['is_syncing'] = None
         self.transformed_data_example_result_options_None['cosmos_rest'][
             'result']['data']['bond_status'] = None
@@ -413,14 +413,14 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                     'code': self.test_exception.code,
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'error': {
                     'meta_data': {
                         'node_name': self.node_1.node_name,
                         'node_id': self.node_1.node_id,
                         'node_parent_id': self.node_1.parent_id,
                         'time': self.test_last_monitored,
-                        'is_mev_tendermint_node': self.test_is_mev_tendermint_node,
+                        'is_mev_cometbft_node': self.test_is_mev_cometbft_node,
                         'is_validator': self.test_is_validator,
                         'operator_address': self.test_operator_address,
                     },
@@ -464,14 +464,14 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                     }
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'error': {
                     'meta_data': {
                         'node_name': self.node_1.node_name,
                         'node_id': self.node_1.node_id,
                         'node_parent_id': self.node_1.parent_id,
                         'time': self.test_last_monitored,
-                        'is_mev_tendermint_node': self.test_is_mev_tendermint_node,
+                        'is_mev_cometbft_node': self.test_is_mev_cometbft_node,
                         'is_validator': self.test_is_validator,
                         'operator_address': self.test_operator_address,
                     },
@@ -526,14 +526,14 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                     },
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'result': {
                     'meta_data': {
                         'node_name': self.node_1.node_name,
                         'node_id': self.node_1.node_id,
                         'node_parent_id': self.node_1.parent_id,
                         'last_monitored': self.test_last_monitored,
-                        'is_mev_tendermint_node': self.test_is_mev_tendermint_node,
+                        'is_mev_cometbft_node': self.test_is_mev_cometbft_node,
                         'is_validator': self.test_is_validator,
                         'operator_address': self.test_operator_address,
                     },
@@ -571,27 +571,27 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
 
         self.processed_data_example_result_all_mev = copy.deepcopy(
             self.processed_data_example_result_all)
-        self.processed_data_example_result_all_mev['tendermint_rpc']['result']['data']['is_peered_with_sentinel'] = {
+        self.processed_data_example_result_all_mev['cometbft_rpc']['result']['data']['is_peered_with_sentinel'] = {
             'current': True,
             'previous': None
         }
-        self.processed_data_example_result_all_mev['tendermint_rpc']['result']['meta_data']['is_mev_tendermint_node'] = True
+        self.processed_data_example_result_all_mev['cometbft_rpc']['result']['meta_data']['is_mev_cometbft_node'] = True
 
         self.processed_data_example_result_options_None = copy.deepcopy(
             self.processed_data_example_result_all)
         self.processed_data_example_result_options_None['prometheus'][
             'result']['data']['voting_power']['current'] = None
-        self.processed_data_example_result_options_None['tendermint_rpc'][
+        self.processed_data_example_result_options_None['cometbft_rpc'][
             'result']['data']['slashed']['current'] = {
             'slashed': False,
             'amount_map': {}
         }
-        self.processed_data_example_result_options_None['tendermint_rpc'][
+        self.processed_data_example_result_options_None['cometbft_rpc'][
             'result']['data']['missed_blocks']['current'] = {
             'total_count': 0,
             'missed_heights': []
         }
-        self.processed_data_example_result_options_None['tendermint_rpc'][
+        self.processed_data_example_result_options_None['cometbft_rpc'][
             'result']['data']['is_syncing']['current'] = None
         self.processed_data_example_result_options_None['cosmos_rest'][
             'result']['data']['bond_status']['current'] = None
@@ -626,14 +626,14 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                     'code': self.test_exception.code,
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'error': {
                     'meta_data': {
                         'node_name': self.node_1.node_name,
                         'node_id': self.node_1.node_id,
                         'node_parent_id': self.node_1.parent_id,
                         'time': self.test_last_monitored,
-                        'is_mev_tendermint_node': self.test_is_mev_tendermint_node,
+                        'is_mev_cometbft_node': self.test_is_mev_cometbft_node,
                         'is_validator': self.test_is_validator,
                         'operator_address': self.test_operator_address,
                     },
@@ -683,14 +683,14 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                     }
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'error': {
                     'meta_data': {
                         'node_name': self.node_1.node_name,
                         'node_id': self.node_1.node_id,
                         'node_parent_id': self.node_1.parent_id,
                         'time': self.test_last_monitored,
-                        'is_mev_tendermint_node': self.test_is_mev_tendermint_node,
+                        'is_mev_cometbft_node': self.test_is_mev_cometbft_node,
                         'is_validator': self.test_is_validator,
                         'operator_address': self.test_operator_address,
                     },
@@ -1028,10 +1028,10 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
         self.redis.delete_all()
 
     @parameterized.expand([
-        ({'prometheus': {}, 'cosmos_rest': {}, 'tendermint_rpc': {}},),
-        ({'prometheus': 'bad_val', 'cosmos_rest': {}, 'tendermint_rpc': {}},),
-        ({'cosmos_rest': 'bad_val', 'prometheus': {}, 'tendermint_rpc': {}},),
-        ({'tendermint_rpc': 'bad_val', 'prometheus': {}, 'cosmos_rest': {}},),
+        ({'prometheus': {}, 'cosmos_rest': {}, 'cometbft_rpc': {}},),
+        ({'prometheus': 'bad_val', 'cosmos_rest': {}, 'cometbft_rpc': {}},),
+        ({'cosmos_rest': 'bad_val', 'prometheus': {}, 'cometbft_rpc': {}},),
+        ({'cometbft_rpc': 'bad_val', 'prometheus': {}, 'cosmos_rest': {}},),
         ({'bad_key': 'bad_val'},),
     ])
     def test_update_state_raises_unexpected_data_exception_if_unexpected_data(
@@ -1064,7 +1064,7 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
             expected_updated_node,
             self.test_data_transformer._state[self.node_1.node_id])
         self.assertFalse(self.test_data_transformer._state[
-                             self.node_1.node_id].is_down_tendermint_rpc)
+                             self.node_1.node_id].is_down_cometbft_rpc)
         self.assertFalse(self.test_data_transformer._state[
                              self.node_1.node_id].is_down_cosmos_rest)
         self.assertFalse(self.test_data_transformer._state[
@@ -1090,7 +1090,7 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
         self.assertEqual(self.test_data_str,
                          self.test_data_transformer._state['dummy_id'])
         # Check that setting state to false after true works
-        self.transformed_data_example_result_mev['tendermint_rpc']['result']['data']['is_peered_with_sentinel'] = False
+        self.transformed_data_example_result_mev['cometbft_rpc']['result']['data']['is_peered_with_sentinel'] = False
         self.test_data_transformer._update_state(
             self.transformed_data_example_result_mev)
         self.assertFalse(self.test_data_transformer._state[self.node_1.node_id].is_peered_with_sentinel)
@@ -1126,15 +1126,15 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                     self.node_1.node_id].is_down_cosmos_rest)
             self.assertTrue(
                 self.test_data_transformer._state[
-                    self.node_1.node_id].is_down_tendermint_rpc)
+                    self.node_1.node_id].is_down_cometbft_rpc)
             old_modified_node_state.set_prometheus_as_down(
                 transformed_data_eval['prometheus']['error']['data'][
                     'went_down_at'])
             old_modified_node_state.set_cosmos_rest_as_down(
                 transformed_data_eval['cosmos_rest']['error']['data'][
                     'went_down_at'])
-            old_modified_node_state.set_tendermint_rpc_as_down(
-                transformed_data_eval['tendermint_rpc']['error']['data'][
+            old_modified_node_state.set_cometbft_rpc_as_down(
+                transformed_data_eval['cometbft_rpc']['error']['data'][
                     'went_down_at'])
         else:
             self.assertFalse(
@@ -1145,7 +1145,7 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                     self.node_1.node_id].is_down_cosmos_rest)
             self.assertFalse(
                 self.test_data_transformer._state[
-                    self.node_1.node_id].is_down_tendermint_rpc)
+                    self.node_1.node_id].is_down_cometbft_rpc)
 
         self.assertEqual(
             old_modified_node_state,
@@ -1166,10 +1166,10 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
         self.assertDictEqual(transformed_data_eval, processed_data)
 
     @parameterized.expand([
-        ({'prometheus': {}, 'cosmos_rest': {}, 'tendermint_rpc': {}},),
-        ({'prometheus': 'bad_val', 'cosmos_rest': {}, 'tendermint_rpc': {}},),
-        ({'cosmos_rest': 'bad_val', 'prometheus': {}, 'tendermint_rpc': {}},),
-        ({'tendermint_rpc': 'bad_val', 'prometheus': {}, 'cosmos_rest': {}},),
+        ({'prometheus': {}, 'cosmos_rest': {}, 'cometbft_rpc': {}},),
+        ({'prometheus': 'bad_val', 'cosmos_rest': {}, 'cometbft_rpc': {}},),
+        ({'cosmos_rest': 'bad_val', 'prometheus': {}, 'cometbft_rpc': {}},),
+        ({'cometbft_rpc': 'bad_val', 'prometheus': {}, 'cosmos_rest': {}},),
         ({'bad_key': 'bad_val'},),
     ])
     def test_proc_trans_data_for_saving_raises_unexp_data_except_on_unexp_data(
@@ -1201,10 +1201,10 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
         self.assertEqual(eval(expected_processed_data), actual_data)
 
     @parameterized.expand([
-        ({'prometheus': {}, 'cosmos_rest': {}, 'tendermint_rpc': {}},),
-        ({'prometheus': 'bad_val', 'cosmos_rest': {}, 'tendermint_rpc': {}},),
-        ({'cosmos_rest': 'bad_val', 'prometheus': {}, 'tendermint_rpc': {}},),
-        ({'tendermint_rpc': 'bad_val', 'prometheus': {}, 'cosmos_rest': {}},),
+        ({'prometheus': {}, 'cosmos_rest': {}, 'cometbft_rpc': {}},),
+        ({'prometheus': 'bad_val', 'cosmos_rest': {}, 'cometbft_rpc': {}},),
+        ({'cosmos_rest': 'bad_val', 'prometheus': {}, 'cometbft_rpc': {}},),
+        ({'cometbft_rpc': 'bad_val', 'prometheus': {}, 'cosmos_rest': {}},),
         ({'bad_key': 'bad_val'},),
     ])
     def test_proc_trans_data_for_alerting_raise_unex_data_except_on_unex_data(
@@ -1246,10 +1246,10 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
         self.assertEqual(proc_saving_return, data_for_saving)
 
     @parameterized.expand([
-        ({'prometheus': {}, 'cosmos_rest': {}, 'tendermint_rpc': {}},),
-        ({'prometheus': 'bad_val', 'cosmos_rest': {}, 'tendermint_rpc': {}},),
-        ({'cosmos_rest': 'bad_val', 'prometheus': {}, 'tendermint_rpc': {}},),
-        ({'tendermint_rpc': 'bad_val', 'prometheus': {}, 'cosmos_rest': {}},),
+        ({'prometheus': {}, 'cosmos_rest': {}, 'cometbft_rpc': {}},),
+        ({'prometheus': 'bad_val', 'cosmos_rest': {}, 'cometbft_rpc': {}},),
+        ({'cosmos_rest': 'bad_val', 'prometheus': {}, 'cometbft_rpc': {}},),
+        ({'cometbft_rpc': 'bad_val', 'prometheus': {}, 'cosmos_rest': {}},),
         ({'bad_key': 'bad_val'},),
     ])
     def test_transform_data_raises_unexpected_data_exception_on_unexpected_data(
@@ -1317,7 +1317,7 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                      }
                  }
              },
-             'tendermint_rpc': {
+             'cometbft_rpc': {
                  'error': {
                      'meta_data': {
                          'node_parent_id': 'node_parent_id1',
@@ -1338,7 +1338,7 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                  }
              }
          }, None,),
-        ({'prometheus': {}, 'cosmos_rest': {}, 'tendermint_rpc': {}}, None,),
+        ({'prometheus': {}, 'cosmos_rest': {}, 'cometbft_rpc': {}}, None,),
         ({
              'prometheus': {
                  'bad_index': {
@@ -1358,7 +1358,7 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                      }
                  }
              },
-             'tendermint_rpc': {
+             'cometbft_rpc': {
                  'result': {
                      'meta_data': {
                          'node_parent_id': 'node_parent_id1',
@@ -1386,7 +1386,7 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                      }
                  }
              },
-             'tendermint_rpc': {
+             'cometbft_rpc': {
                  'result': {
                      'meta_data': {
                          'node_parent_id': 'node_parent_id1',
@@ -1415,7 +1415,7 @@ class TestCosmosNodeDataTransformer(unittest.TestCase):
                      }
                  }
              },
-             'tendermint_rpc': {
+             'cometbft_rpc': {
                  'result': {
                      'meta_data': {
                          'node_parent_id': 'node_parent_id1',

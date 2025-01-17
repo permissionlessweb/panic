@@ -206,8 +206,8 @@ describe('ODM Config data structure', () => {
         expect(created).toEqual(1651528966);
 
         expect(repository.modified).toEqual(null);
-        expect(repository.name).toEqual('Tendermint');
-        expect(repository.value).toEqual('tendermint/tendermint/');
+        expect(repository.name).toEqual('Cometbft');
+        expect(repository.value).toEqual('cometbft/cometbft/');
         expect(repository.namespace).toEqual(null);
 
         expect(typeof repository.type).toEqual('object');

@@ -110,9 +110,9 @@ class CosmosNodeStore(Store):
                 'result': self._process_redis_prometheus_result_store,
                 'error': self._process_redis_prometheus_error_store,
             },
-            'tendermint_rpc': {
-                'result': self._process_redis_tendermint_rpc_result_store,
-                'error': self._process_redis_tendermint_rpc_error_store,
+            'cometbft_rpc': {
+                'result': self._process_redis_cometbft_rpc_result_store,
+                'error': self._process_redis_cometbft_rpc_error_store,
             },
             'cosmos_rest': {
                 'result': self._process_redis_cosmos_rest_result_store,
@@ -217,7 +217,7 @@ class CosmosNodeStore(Store):
                     str(metrics['went_down_at']),
             })
 
-    def _process_redis_tendermint_rpc_error_store(self, data: Dict) -> None:
+    def _process_redis_cometbft_rpc_error_store(self, data: Dict) -> None:
         meta_data = data['meta_data']
         error_code = data['code']
         node_name = meta_data['node_name']
@@ -233,11 +233,11 @@ class CosmosNodeStore(Store):
             )
 
             self.redis.hset_multiple(Keys.get_hash_parent(parent_id), {
-                Keys.get_cosmos_node_went_down_at_tendermint_rpc(node_id):
+                Keys.get_cosmos_node_went_down_at_cometbft_rpc(node_id):
                     str(metrics['went_down_at']),
             })
 
-    def _process_redis_tendermint_rpc_result_store(self, data: Dict) -> None:
+    def _process_redis_cometbft_rpc_result_store(self, data: Dict) -> None:
         meta_data = data['meta_data']
         node_name = meta_data['node_name']
         node_id = meta_data['node_id']
@@ -256,7 +256,7 @@ class CosmosNodeStore(Store):
         self.redis.hset_multiple(
             Keys.get_hash_parent(parent_id),
             {
-                Keys.get_cosmos_node_went_down_at_tendermint_rpc(
+                Keys.get_cosmos_node_went_down_at_cometbft_rpc(
                     node_id): str(metrics['went_down_at']),
                 Keys.get_cosmos_node_is_syncing(node_id):
                     str(metrics['is_syncing']),
@@ -267,7 +267,7 @@ class CosmosNodeStore(Store):
                 Keys.get_cosmos_node_missed_blocks(
                     node_id):
                     json.dumps(metrics['missed_blocks']),
-                Keys.get_cosmos_node_last_monitored_tendermint_rpc(node_id):
+                Keys.get_cosmos_node_last_monitored_cometbft_rpc(node_id):
                     str(meta_data['last_monitored']),
             })
 
@@ -277,9 +277,9 @@ class CosmosNodeStore(Store):
                 'result': self._process_mongo_prometheus_result_store,
                 'error': self._process_mongo_prometheus_error_store,
             },
-            'tendermint_rpc': {
-                'result': self._process_mongo_tendermint_rpc_result_store,
-                'error': self._process_mongo_tendermint_rpc_error_store,
+            'cometbft_rpc': {
+                'result': self._process_mongo_cometbft_rpc_result_store,
+                'error': self._process_mongo_cometbft_rpc_error_store,
             },
             'cosmos_rest': {
                 'result': self._process_mongo_cosmos_rest_result_store,
@@ -370,7 +370,7 @@ class CosmosNodeStore(Store):
                 }
             )
 
-    def _process_mongo_tendermint_rpc_result_store(self, data: Dict) -> None:
+    def _process_mongo_cometbft_rpc_result_store(self, data: Dict) -> None:
         """
         Updating mongo with node metrics using a time-based document with 360
         entries per hour per node, assuming each node monitoring round is
@@ -399,7 +399,7 @@ class CosmosNodeStore(Store):
             {
                 '$push': {
                     node_id: {
-                        'went_down_at_tendermint_rpc': str(
+                        'went_down_at_cometbft_rpc': str(
                             metrics['went_down_at']),
                         'is_syncing': str(metrics['is_syncing']),
                         'is_peered_with_sentinel': "" if ('is_peered_with_sentinel' not in metrics) else str(metrics['is_peered_with_sentinel']),
@@ -412,7 +412,7 @@ class CosmosNodeStore(Store):
             }
         )
 
-    def _process_mongo_tendermint_rpc_error_store(self, data: Dict) -> None:
+    def _process_mongo_cometbft_rpc_error_store(self, data: Dict) -> None:
         """
         Updating mongo with error metrics using a time-based document with 360
         entries per hour per node, assuming each node monitoring round is 10
@@ -446,7 +446,7 @@ class CosmosNodeStore(Store):
                 {
                     '$push': {
                         node_id: {
-                            'went_down_at_tendermint_rpc':
+                            'went_down_at_cometbft_rpc':
                                 str(metrics['went_down_at']),
                             'timestamp': meta_data['time'],
                         }

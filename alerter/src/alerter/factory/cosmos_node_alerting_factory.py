@@ -85,7 +85,7 @@ class CosmosNodeAlertingFactory(AlertingFactory):
                 AlertsMetricCode.BlockHeightDifferenceThreshold.value: False,
                 AlertsMetricCode.PrometheusSourceIsDown.value: False,
                 AlertsMetricCode.CosmosRestSourceIsDown.value: False,
-                AlertsMetricCode.TendermintRPCSourceIsDown.value: False,
+                AlertsMetricCode.CometbftRPCSourceIsDown.value: False,
             }
             critical_sent = {
                 AlertsMetricCode.NodeIsDown.value: False,
@@ -94,16 +94,16 @@ class CosmosNodeAlertingFactory(AlertingFactory):
                 AlertsMetricCode.BlockHeightDifferenceThreshold.value: False,
                 AlertsMetricCode.PrometheusSourceIsDown.value: False,
                 AlertsMetricCode.CosmosRestSourceIsDown.value: False,
-                AlertsMetricCode.TendermintRPCSourceIsDown.value: False,
+                AlertsMetricCode.CometbftRPCSourceIsDown.value: False,
             }
             error_sent = {
                 AlertsMetricCode.PrometheusInvalidUrl.value: False,
                 AlertsMetricCode.CosmosRestInvalidUrl.value: False,
-                AlertsMetricCode.TendermintRPCInvalidUrl.value: False,
+                AlertsMetricCode.CometbftRPCInvalidUrl.value: False,
                 AlertsMetricCode.NoSyncedCosmosRestSource.value: False,
-                AlertsMetricCode.NoSyncedTendermintRPCSource.value: False,
+                AlertsMetricCode.NoSyncedCometbftRPCSource.value: False,
                 AlertsMetricCode.CosmosRestDataNotObtained.value: False,
-                AlertsMetricCode.TendermintRPCDataNotObtained.value: False,
+                AlertsMetricCode.CometbftRPCDataNotObtained.value: False,
                 AlertsMetricCode.MetricNotFound.value: False,
             }
             any_severity_sent = {
@@ -142,11 +142,11 @@ class CosmosNodeAlertingFactory(AlertingFactory):
                 if is_validator
                 else alerts_config.cannot_access_cosmos_rest_node
             )
-            tendermint_rpc_is_down_thresholds = parse_alert_time_thresholds(
+            cometbft_rpc_is_down_thresholds = parse_alert_time_thresholds(
                 ['warning_threshold', 'critical_threshold', 'critical_repeat'],
-                alerts_config.cannot_access_tendermint_rpc_validator
+                alerts_config.cannot_access_cometbft_rpc_validator
                 if is_validator
-                else alerts_config.cannot_access_tendermint_rpc_node
+                else alerts_config.cannot_access_cometbft_rpc_node
             )
 
             warning_window_timer = {
@@ -161,9 +161,9 @@ class CosmosNodeAlertingFactory(AlertingFactory):
                 AlertsMetricCode.CosmosRestSourceIsDown.value: TimedTaskTracker(
                     timedelta(seconds=cosmos_rest_is_down_thresholds[
                         'warning_threshold'])),
-                AlertsMetricCode.TendermintRPCSourceIsDown.value:
+                AlertsMetricCode.CometbftRPCSourceIsDown.value:
                     TimedTaskTracker(timedelta(
-                        seconds=tendermint_rpc_is_down_thresholds[
+                        seconds=cometbft_rpc_is_down_thresholds[
                             'warning_threshold']))
             }
             critical_window_timer = {
@@ -178,9 +178,9 @@ class CosmosNodeAlertingFactory(AlertingFactory):
                 AlertsMetricCode.CosmosRestSourceIsDown.value: TimedTaskTracker(
                     timedelta(seconds=cosmos_rest_is_down_thresholds[
                         'critical_threshold'])),
-                AlertsMetricCode.TendermintRPCSourceIsDown.value:
+                AlertsMetricCode.CometbftRPCSourceIsDown.value:
                     TimedTaskTracker(timedelta(
-                        seconds=tendermint_rpc_is_down_thresholds[
+                        seconds=cometbft_rpc_is_down_thresholds[
                             'critical_threshold'])),
             }
             critical_repeat_timer = {
@@ -204,9 +204,9 @@ class CosmosNodeAlertingFactory(AlertingFactory):
                     TimedTaskLimiter(timedelta(
                         seconds=cosmos_rest_is_down_thresholds[
                             'critical_repeat'])),
-                AlertsMetricCode.TendermintRPCSourceIsDown.value:
+                AlertsMetricCode.CometbftRPCSourceIsDown.value:
                     TimedTaskLimiter(timedelta(
-                        seconds=tendermint_rpc_is_down_thresholds[
+                        seconds=cometbft_rpc_is_down_thresholds[
                             'critical_repeat'])),
             }
             warning_occurrences_in_period_tracker = {
@@ -260,11 +260,11 @@ class CosmosNodeAlertingFactory(AlertingFactory):
                 if is_validator
                 else alerts_config.cannot_access_cosmos_rest_node
             )
-            tendermint_rpc_is_down_thresholds = parse_alert_time_thresholds(
+            cometbft_rpc_is_down_thresholds = parse_alert_time_thresholds(
                 ['warning_threshold', 'critical_threshold', 'critical_repeat'],
-                alerts_config.cannot_access_tendermint_rpc_validator
+                alerts_config.cannot_access_cometbft_rpc_validator
                 if is_validator
-                else alerts_config.cannot_access_tendermint_rpc_node
+                else alerts_config.cannot_access_cometbft_rpc_node
             )
 
             warning_window_timers = self.alerting_state[parent_id][node_id][
@@ -290,9 +290,9 @@ class CosmosNodeAlertingFactory(AlertingFactory):
             ].set_time_interval(timedelta(
                 seconds=cosmos_rest_is_down_thresholds['warning_threshold']))
             warning_window_timers[
-                AlertsMetricCode.TendermintRPCSourceIsDown.value
+                AlertsMetricCode.CometbftRPCSourceIsDown.value
             ].set_time_interval(timedelta(
-                seconds=tendermint_rpc_is_down_thresholds['warning_threshold']))
+                seconds=cometbft_rpc_is_down_thresholds['warning_threshold']))
 
             critical_window_timers[
                 AlertsMetricCode.NodeIsDown.value].set_time_interval(
@@ -313,9 +313,9 @@ class CosmosNodeAlertingFactory(AlertingFactory):
                 timedelta(seconds=cosmos_rest_is_down_thresholds[
                     'critical_threshold']))
             critical_window_timers[
-                AlertsMetricCode.TendermintRPCSourceIsDown.value
+                AlertsMetricCode.CometbftRPCSourceIsDown.value
             ].set_time_interval(
-                timedelta(seconds=tendermint_rpc_is_down_thresholds[
+                timedelta(seconds=cometbft_rpc_is_down_thresholds[
                     'critical_threshold']))
 
             critical_repeat_timers[
@@ -336,9 +336,9 @@ class CosmosNodeAlertingFactory(AlertingFactory):
                 timedelta(seconds=cosmos_rest_is_down_thresholds[
                     'critical_repeat']))
             critical_repeat_timers[
-                AlertsMetricCode.TendermintRPCSourceIsDown.value
+                AlertsMetricCode.CometbftRPCSourceIsDown.value
             ].set_time_interval(
-                timedelta(seconds=tendermint_rpc_is_down_thresholds[
+                timedelta(seconds=cometbft_rpc_is_down_thresholds[
                     'critical_repeat']))
 
             self.alerting_state[parent_id][node_id][

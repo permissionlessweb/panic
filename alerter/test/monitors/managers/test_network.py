@@ -178,11 +178,11 @@ class TestNetworkMonitorsManager(unittest.TestCase):
                 'monitor_network': 'True',
                 'operator_address':
                     self.cosmos_test_nodes.archive_validator.operator_address,
-                'tendermint_rpc_url':
-                    self.cosmos_test_nodes.archive_validator.tendermint_rpc_url,
-                'monitor_tendermint_rpc': str(
+                'cometbft_rpc_url':
+                    self.cosmos_test_nodes.archive_validator.cometbft_rpc_url,
+                'monitor_cometbft_rpc': str(
                     (self.cosmos_test_nodes.archive_validator
-                     .monitor_tendermint_rpc)
+                     .monitor_cometbft_rpc)
                 )
             },
             self.cosmos_test_nodes.archive_non_validator.node_id: {
@@ -221,12 +221,12 @@ class TestNetworkMonitorsManager(unittest.TestCase):
                 'operator_address':
                     (self.cosmos_test_nodes.archive_non_validator
                      .operator_address),
-                'tendermint_rpc_url':
+                'cometbft_rpc_url':
                     (self.cosmos_test_nodes.archive_non_validator
-                     .tendermint_rpc_url),
-                'monitor_tendermint_rpc': str(
+                     .cometbft_rpc_url),
+                'monitor_cometbft_rpc': str(
                     (self.cosmos_test_nodes.archive_non_validator
-                     .monitor_tendermint_rpc)
+                     .monitor_cometbft_rpc)
                 )
             }
         }
@@ -312,11 +312,11 @@ class TestNetworkMonitorsManager(unittest.TestCase):
                 'monitor_network': 'True',
                 'operator_address':
                     self.cosmos_test_nodes.archive_validator.operator_address,
-                'tendermint_rpc_url':
-                    self.cosmos_test_nodes.archive_validator.tendermint_rpc_url,
-                'monitor_tendermint_rpc': str(
+                'cometbft_rpc_url':
+                    self.cosmos_test_nodes.archive_validator.cometbft_rpc_url,
+                'monitor_cometbft_rpc': str(
                     (self.cosmos_test_nodes.archive_validator
-                     .monitor_tendermint_rpc)
+                     .monitor_cometbft_rpc)
                 )
             },
             self.cosmos_test_nodes.archive_non_validator.node_id: {
@@ -352,12 +352,12 @@ class TestNetworkMonitorsManager(unittest.TestCase):
                 'operator_address':
                     (self.cosmos_test_nodes.archive_non_validator
                      .operator_address),
-                'tendermint_rpc_url':
+                'cometbft_rpc_url':
                     (self.cosmos_test_nodes.archive_non_validator
-                     .tendermint_rpc_url),
-                'monitor_tendermint_rpc': str(
+                     .cometbft_rpc_url),
+                'monitor_cometbft_rpc': str(
                     (self.cosmos_test_nodes.archive_non_validator
-                     .monitor_tendermint_rpc)
+                     .monitor_cometbft_rpc)
                 )
             }
         }

@@ -21,8 +21,8 @@ class NodeSubconfigModel(BaseModel):
     use_as_data_source: bool = None
     monitor_network: bool = None
     operator_address: str = None
-    monitor_tendermint_rpc: bool = None
-    tendermint_rpc_url: str = None
+    monitor_cometbft_rpc: bool = None
+    cometbft_rpc_url: str = None
     node_ws_url: str = None
     stash_address: str = None
     governance_addresses: str = None
@@ -47,8 +47,8 @@ class NodeSubconfigModel(BaseModel):
         self.use_as_data_source = tuple.use_as_data_source
         self.monitor_network = tuple.monitor_network
         self.operator_address = tuple.operator_address
-        self.monitor_tendermint_rpc = tuple.monitor_tendermint_rpc
-        self.tendermint_rpc_url = tuple.tendermint_rpc_url
+        self.monitor_cometbft_rpc = tuple.monitor_cometbft_rpc
+        self.cometbft_rpc_url = tuple.cometbft_rpc_url
         self.node_ws_url = tuple.node_ws_url
         self.stash_address = tuple.stash_address
         self.governance_addresses = tuple.governance_addresses

@@ -36,8 +36,8 @@ class TestCosmosNodeAlertingFactory(unittest.TestCase):
             'cannot_access_prometheus_node',
             'cannot_access_cosmos_rest_validator',
             'cannot_access_cosmos_rest_node',
-            'cannot_access_tendermint_rpc_validator',
-            'cannot_access_tendermint_rpc_node'
+            'cannot_access_cometbft_rpc_validator',
+            'cannot_access_cometbft_rpc_node'
         ]
         metrics_with_time_window = ['missed_blocks']
         severity_metrics = [
@@ -100,10 +100,10 @@ class TestCosmosNodeAlertingFactory(unittest.TestCase):
                 'cannot_access_cosmos_rest_validator'],
             cannot_access_cosmos_rest_node=filtered[
                 'cannot_access_cosmos_rest_node'],
-            cannot_access_tendermint_rpc_validator=filtered[
-                'cannot_access_tendermint_rpc_validator'],
-            cannot_access_tendermint_rpc_node=filtered[
-                'cannot_access_tendermint_rpc_node'],
+            cannot_access_cometbft_rpc_validator=filtered[
+                'cannot_access_cometbft_rpc_validator'],
+            cannot_access_cometbft_rpc_node=filtered[
+                'cannot_access_cometbft_rpc_node'],
             missed_blocks=filtered['missed_blocks'], slashed=filtered[
                 'slashed'], node_is_syncing=filtered['node_is_syncing'],
             validator_is_syncing=filtered['validator_is_syncing'],
@@ -147,17 +147,17 @@ class TestCosmosNodeAlertingFactory(unittest.TestCase):
             AlertsMetricCode.BlockHeightDifferenceThreshold.value: False,
             AlertsMetricCode.PrometheusSourceIsDown.value: False,
             AlertsMetricCode.CosmosRestSourceIsDown.value: False,
-            AlertsMetricCode.TendermintRPCSourceIsDown.value: False,
+            AlertsMetricCode.CometbftRPCSourceIsDown.value: False,
         }
         critical_sent = copy.deepcopy(warning_sent)
         error_sent = {
             AlertsMetricCode.PrometheusInvalidUrl.value: False,
             AlertsMetricCode.CosmosRestInvalidUrl.value: False,
-            AlertsMetricCode.TendermintRPCInvalidUrl.value: False,
+            AlertsMetricCode.CometbftRPCInvalidUrl.value: False,
             AlertsMetricCode.NoSyncedCosmosRestSource.value: False,
-            AlertsMetricCode.NoSyncedTendermintRPCSource.value: False,
+            AlertsMetricCode.NoSyncedCometbftRPCSource.value: False,
             AlertsMetricCode.CosmosRestDataNotObtained.value: False,
-            AlertsMetricCode.TendermintRPCDataNotObtained.value: False,
+            AlertsMetricCode.CometbftRPCDataNotObtained.value: False,
             AlertsMetricCode.MetricNotFound.value: False,
         }
         any_severity_sent = {
@@ -197,11 +197,11 @@ class TestCosmosNodeAlertingFactory(unittest.TestCase):
             if is_validator
             else alerts_config.cannot_access_cosmos_rest_node
         )
-        tendermint_rpc_is_down_thresholds = parse_alert_time_thresholds(
+        cometbft_rpc_is_down_thresholds = parse_alert_time_thresholds(
             ['warning_threshold', 'critical_threshold', 'critical_repeat'],
-            alerts_config.cannot_access_tendermint_rpc_validator
+            alerts_config.cannot_access_cometbft_rpc_validator
             if is_validator
-            else alerts_config.cannot_access_tendermint_rpc_node
+            else alerts_config.cannot_access_cometbft_rpc_node
         )
 
         warning_window_timer = {
@@ -216,9 +216,9 @@ class TestCosmosNodeAlertingFactory(unittest.TestCase):
             AlertsMetricCode.CosmosRestSourceIsDown.value: TimedTaskTracker(
                 timedelta(seconds=cosmos_rest_is_down_thresholds[
                     'warning_threshold'])),
-            AlertsMetricCode.TendermintRPCSourceIsDown.value:
+            AlertsMetricCode.CometbftRPCSourceIsDown.value:
                 TimedTaskTracker(timedelta(
-                    seconds=tendermint_rpc_is_down_thresholds[
+                    seconds=cometbft_rpc_is_down_thresholds[
                         'warning_threshold']))
         }
         critical_window_timer = {
@@ -233,9 +233,9 @@ class TestCosmosNodeAlertingFactory(unittest.TestCase):
             AlertsMetricCode.CosmosRestSourceIsDown.value: TimedTaskTracker(
                 timedelta(seconds=cosmos_rest_is_down_thresholds[
                     'critical_threshold'])),
-            AlertsMetricCode.TendermintRPCSourceIsDown.value:
+            AlertsMetricCode.CometbftRPCSourceIsDown.value:
                 TimedTaskTracker(timedelta(
-                    seconds=tendermint_rpc_is_down_thresholds[
+                    seconds=cometbft_rpc_is_down_thresholds[
                         'critical_threshold'])),
         }
         critical_repeat_timer = {
@@ -259,9 +259,9 @@ class TestCosmosNodeAlertingFactory(unittest.TestCase):
                 TimedTaskLimiter(timedelta(
                     seconds=cosmos_rest_is_down_thresholds[
                         'critical_repeat'])),
-            AlertsMetricCode.TendermintRPCSourceIsDown.value:
+            AlertsMetricCode.CometbftRPCSourceIsDown.value:
                 TimedTaskLimiter(timedelta(
-                    seconds=tendermint_rpc_is_down_thresholds[
+                    seconds=cometbft_rpc_is_down_thresholds[
                         'critical_repeat'])),
         }
         warning_occurrences_in_period_tracker = {
@@ -359,7 +359,7 @@ class TestCosmosNodeAlertingFactory(unittest.TestCase):
                             TimedTaskTracker(timedelta(seconds=0)),
                         AlertsMetricCode.CosmosRestSourceIsDown.value:
                             TimedTaskTracker(timedelta(seconds=0)),
-                        AlertsMetricCode.TendermintRPCSourceIsDown.value:
+                        AlertsMetricCode.CometbftRPCSourceIsDown.value:
                             TimedTaskTracker(timedelta(seconds=0))
                     },
                     'critical_window_timer': {
@@ -371,7 +371,7 @@ class TestCosmosNodeAlertingFactory(unittest.TestCase):
                             TimedTaskTracker(timedelta(seconds=0)),
                         AlertsMetricCode.CosmosRestSourceIsDown.value:
                             TimedTaskTracker(timedelta(seconds=0)),
-                        AlertsMetricCode.TendermintRPCSourceIsDown.value:
+                        AlertsMetricCode.CometbftRPCSourceIsDown.value:
                             TimedTaskTracker(timedelta(seconds=0)),
                     },
                     'critical_repeat_timer': {
@@ -383,7 +383,7 @@ class TestCosmosNodeAlertingFactory(unittest.TestCase):
                             TimedTaskLimiter(timedelta(seconds=0)),
                         AlertsMetricCode.CosmosRestSourceIsDown.value:
                             TimedTaskLimiter(timedelta(seconds=0)),
-                        AlertsMetricCode.TendermintRPCSourceIsDown.value:
+                        AlertsMetricCode.CometbftRPCSourceIsDown.value:
                             TimedTaskLimiter(timedelta(seconds=0)),
                     },
                     'is_validator': not is_validator
@@ -417,11 +417,11 @@ class TestCosmosNodeAlertingFactory(unittest.TestCase):
             if is_validator
             else alerts_config.cannot_access_cosmos_rest_node
         )
-        tendermint_rpc_is_down_thresholds = parse_alert_time_thresholds(
+        cometbft_rpc_is_down_thresholds = parse_alert_time_thresholds(
             ['warning_threshold', 'critical_threshold', 'critical_repeat'],
-            alerts_config.cannot_access_tendermint_rpc_validator
+            alerts_config.cannot_access_cometbft_rpc_validator
             if is_validator
-            else alerts_config.cannot_access_tendermint_rpc_node
+            else alerts_config.cannot_access_cometbft_rpc_node
         )
         expected_state = {
             self.test_parent_id: {
@@ -444,9 +444,9 @@ class TestCosmosNodeAlertingFactory(unittest.TestCase):
                             TimedTaskTracker(timedelta(
                                 seconds=cosmos_rest_is_down_thresholds[
                                     'warning_threshold'])),
-                        AlertsMetricCode.TendermintRPCSourceIsDown.value:
+                        AlertsMetricCode.CometbftRPCSourceIsDown.value:
                             TimedTaskTracker(timedelta(
-                                seconds=tendermint_rpc_is_down_thresholds[
+                                seconds=cometbft_rpc_is_down_thresholds[
                                     'warning_threshold']))
                     },
                     'critical_window_timer': {
@@ -466,9 +466,9 @@ class TestCosmosNodeAlertingFactory(unittest.TestCase):
                             TimedTaskTracker(timedelta(
                                 seconds=cosmos_rest_is_down_thresholds[
                                     'critical_threshold'])),
-                        AlertsMetricCode.TendermintRPCSourceIsDown.value:
+                        AlertsMetricCode.CometbftRPCSourceIsDown.value:
                             TimedTaskTracker(timedelta(
-                                seconds=tendermint_rpc_is_down_thresholds[
+                                seconds=cometbft_rpc_is_down_thresholds[
                                     'critical_threshold'])),
                     },
                     'critical_repeat_timer': {
@@ -488,9 +488,9 @@ class TestCosmosNodeAlertingFactory(unittest.TestCase):
                             TimedTaskLimiter(timedelta(
                                 seconds=cosmos_rest_is_down_thresholds[
                                     'critical_repeat'])),
-                        AlertsMetricCode.TendermintRPCSourceIsDown.value:
+                        AlertsMetricCode.CometbftRPCSourceIsDown.value:
                             TimedTaskLimiter(timedelta(
-                                seconds=tendermint_rpc_is_down_thresholds[
+                                seconds=cometbft_rpc_is_down_thresholds[
                                     'critical_repeat'])),
                     },
                     'is_validator': is_validator

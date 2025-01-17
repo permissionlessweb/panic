@@ -604,9 +604,9 @@ class QueueDataSelectorHelper:
                 'cosmos_rest_url': str(node.cosmos_rest_url or ''),
                 'monitor_cosmos_rest':
                     'true' if node.monitor_cosmos_rest else 'false',
-                'tendermint_rpc_url': str(node.tendermint_rpc_url or ''),
-                'monitor_tendermint_rpc':
-                    'true' if node.monitor_tendermint_rpc else 'false',
+                'cometbft_rpc_url': str(node.cometbft_rpc_url or ''),
+                'monitor_cometbft_rpc':
+                    'true' if node.monitor_cometbft_rpc else 'false',
                 'operator_address': str(node.operator_address or ''),
                 'monitor_prometheus':
                     'true' if node.monitor_prometheus else 'false',

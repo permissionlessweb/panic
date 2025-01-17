@@ -18,7 +18,7 @@ import {
   deleteAccount,
   pingDockerHub,
   pingEthRPC,
-  pingTendermintRPC,
+  pingCometbftRPC,
 } from './data';
 import sleep from './time';
 
@@ -459,11 +459,11 @@ function PingRPC({ disabled, httpUrl }) {
   );
 }
 
-function PingTendermint({ disabled, httpUrl }) {
+function PingCometbft({ disabled, httpUrl }) {
   const onClick = async () => {
     try {
       ToastsStore.info(`Connecting with Node Http URL ${httpUrl}`, 5000);
-      await pingTendermintRPC(httpUrl);
+      await pingCometbftRPC(httpUrl);
       ToastsStore.success('Successfully connected', 5000);
     } catch (e) {
       if (e.response) {
@@ -634,7 +634,7 @@ PingRPC.propTypes = forbidExtraProps({
   httpUrl: PropTypes.string.isRequired,
 });
 
-PingTendermint.propTypes = forbidExtraProps({
+PingCometbft.propTypes = forbidExtraProps({
   disabled: PropTypes.bool.isRequired,
   httpUrl: PropTypes.string.isRequired,
 });
@@ -687,6 +687,6 @@ export {
   BackButton,
   PingDockerHubButton,
   PingRPC,
-  PingTendermint,
+  PingCometbft,
   PingMultiplePrometheus,
 };

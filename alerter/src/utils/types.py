@@ -112,15 +112,15 @@ from src.alerter.alerts.node.cosmos import (
     CosmosNodeCosmosRestServerDataCouldNotBeObtainedAlert,
     CosmosRestServerDataObtainedAlert as
     CosmosNodeCosmosRestServerDataObtainedAlert,
-    TendermintRPCInvalidUrlAlert as CosmosNodeTendermintRPCInvalidUrlAlert,
-    TendermintRPCValidUrlAlert as CosmosNodeTendermintRPCValidUrlAlert,
-    ErrorNoSyncedTendermintRPCDataSourcesAlert as
-    CosmosNodeErrorNoSyncedTendermintRPCDataSourcesAlert,
-    SyncedTendermintRPCDataSourcesFoundAlert as
-    CosmosNodeSyncedTendermintRPCDataSourcesFoundAlert,
-    TendermintRPCDataCouldNotBeObtainedAlert as
-    CosmosNodeTendermintRPCDataCouldNotBeObtainedAlert,
-    TendermintRPCDataObtainedAlert as CosmosNodeTendermintRPCDataObtainedAlert,
+    CometbftRPCInvalidUrlAlert as CosmosNodeCometbftRPCInvalidUrlAlert,
+    CometbftRPCValidUrlAlert as CosmosNodeCometbftRPCValidUrlAlert,
+    ErrorNoSyncedCometbftRPCDataSourcesAlert as
+    CosmosNodeErrorNoSyncedCometbftRPCDataSourcesAlert,
+    SyncedCometbftRPCDataSourcesFoundAlert as
+    CosmosNodeSyncedCometbftRPCDataSourcesFoundAlert,
+    CometbftRPCDataCouldNotBeObtainedAlert as
+    CosmosNodeCometbftRPCDataCouldNotBeObtainedAlert,
+    CometbftRPCDataObtainedAlert as CosmosNodeCometbftRPCDataObtainedAlert,
     NodeStillDownAlert as CosmosNodeNodeStillDownAlert,
     NodeWentDownAtAlert as CosmosNodeNodeWentDownAtAlert,
     NodeBackUpAgainAlert as CosmosNodeNodeBackUpAgainAlert,
@@ -132,11 +132,11 @@ from src.alerter.alerts.node.cosmos import (
     CosmosRestSourceStillDownAlert as CosmosNodeCosmosRestSourceStillDownAlert,
     CosmosRestSourceBackUpAgainAlert as
     CosmosNodeCosmosRestSourceBackUpAgainAlert,
-    TendermintRPCSourceIsDownAlert as CosmosNodeTendermintRPCSourceIsDownAlert,
-    TendermintRPCSourceStillDownAlert as
-    CosmosNodeTendermintRPCSourceStillDownAlert,
-    TendermintRPCSourceBackUpAgainAlert as
-    CosmosNodeTendermintRPCSourceBackUpAgainAlert,
+    CometbftRPCSourceIsDownAlert as CosmosNodeCometbftRPCSourceIsDownAlert,
+    CometbftRPCSourceStillDownAlert as
+    CosmosNodeCometbftRPCSourceStillDownAlert,
+    CometbftRPCSourceBackUpAgainAlert as
+    CosmosNodeCometbftRPCSourceBackUpAgainAlert,
 )
 from src.alerter.alerts.node.evm import (
     NoChangeInBlockHeight as EVMNodeNoChangeInBlockHeight,
@@ -366,18 +366,18 @@ CosmosNodeErrorAlert = Union[
     CosmosNodeCosmosRestInvalidUrlAlert,
     CosmosNodeErrorNoSyncedCosmosRestDataSourcesAlert,
     CosmosNodeCosmosRestServerDataCouldNotBeObtainedAlert,
-    CosmosNodeTendermintRPCInvalidUrlAlert,
-    CosmosNodeErrorNoSyncedTendermintRPCDataSourcesAlert,
-    CosmosNodeTendermintRPCDataCouldNotBeObtainedAlert,
+    CosmosNodeCometbftRPCInvalidUrlAlert,
+    CosmosNodeErrorNoSyncedCometbftRPCDataSourcesAlert,
+    CosmosNodeCometbftRPCDataCouldNotBeObtainedAlert,
 ]
 CosmosNodeErrorSolvedAlert = Union[
     CosmosNodePrometheusValidUrlAlert, CosmosNodeMetricFoundAlert,
     CosmosNodeCosmosRestValidUrlAlert,
     CosmosNodeSyncedCosmosRestDataSourcesFoundAlert,
     CosmosNodeCosmosRestServerDataObtainedAlert,
-    CosmosNodeTendermintRPCValidUrlAlert,
-    CosmosNodeSyncedTendermintRPCDataSourcesFoundAlert,
-    CosmosNodeTendermintRPCDataObtainedAlert
+    CosmosNodeCometbftRPCValidUrlAlert,
+    CosmosNodeSyncedCometbftRPCDataSourcesFoundAlert,
+    CosmosNodeCometbftRPCDataObtainedAlert
 ]
 CosmosNetworkErrorAlert = Union[
     CosmosNetworkCosmosNetworkDataCouldNotBeObtainedAlert,
@@ -421,19 +421,19 @@ DownAlert = Union[
     SystemWentDownAtAlert, ClNodeNodeWentDownAtAlert,
     CosmosNodeNodeWentDownAtAlert, CosmosNodePrometheusSourceIsDownAlert,
     CosmosNodeCosmosRestSourceIsDownAlert,
-    CosmosNodeTendermintRPCSourceIsDownAlert
+    CosmosNodeCometbftRPCSourceIsDownAlert
 ]
 StillDownAlert = Union[
     SystemStillDownAlert, ClNodeNodeStillDownAlert,
     CosmosNodeNodeStillDownAlert, CosmosNodePrometheusSourceStillDownAlert,
     CosmosNodeCosmosRestSourceStillDownAlert,
-    CosmosNodeTendermintRPCSourceStillDownAlert
+    CosmosNodeCometbftRPCSourceStillDownAlert
 ]
 BackUpAlert = Union[
     SystemBackUpAgainAlert, ClNodeNodeBackUpAgainAlert,
     CosmosNodeNodeBackUpAgainAlert, CosmosNodePrometheusSourceBackUpAgainAlert,
     CosmosNodeCosmosRestSourceBackUpAgainAlert,
-    CosmosNodeTendermintRPCSourceBackUpAgainAlert
+    CosmosNodeCometbftRPCSourceBackUpAgainAlert
 ]
 
 ConditionalNoChangeInAlert = Union[

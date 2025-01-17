@@ -10,13 +10,13 @@ export class PanicInstallerSourcesFormCosmosNode {
     @Prop() node: NodeSubconfig;
     @State() cosmosRestUrlToPing: string;
     @State() prometheusUrlToPing: string;
-    @State() tendermintRpcUrlToPing: string;
+    @State() cometbftRpcUrlToPing: string;
     @State() nodeExporterUrlToPing: string;
 
     @State() _enableMonitorCosmosRest: boolean = true;
     @State() _enableMonitorPrometheus: boolean = true;
     @State() _enableMonitorSystem: boolean = true;
-    @State() _enableMonitorTendermintRpc: boolean = true;
+    @State() _enableMonitorCometbftRpc: boolean = true;
     @State() _enableOperatorAddress: boolean = true;
 
     updateCosmosRestUrlToPing(url: string): void{
@@ -27,8 +27,8 @@ export class PanicInstallerSourcesFormCosmosNode {
         this.prometheusUrlToPing = url;
     }
 
-    updateTendermintUrlToPing(url: string): void{
-        this.tendermintRpcUrlToPing = url;
+    updateCometbftUrlToPing(url: string): void{
+        this.cometbftRpcUrlToPing = url;
     }
 
     updateNodeExporterUrlToPing(url: string): void{
@@ -47,8 +47,8 @@ export class PanicInstallerSourcesFormCosmosNode {
       this._enableMonitorSystem = bool;
     }
 
-    updateEnableMonitorTendermintRpc(bool: boolean): void {
-      this._enableMonitorTendermintRpc = bool;
+    updateEnableMonitorCometbftRpc(bool: boolean): void {
+      this._enableMonitorCometbftRpc = bool;
     }
 
     updateEnableMonitorOperatorAddress(bool: boolean): void {
@@ -70,9 +70,9 @@ export class PanicInstallerSourcesFormCosmosNode {
       this.updateEnableMonitorSystem(event.detail.checked);
     }
 
-    @Listen("monitorTendermintRpc", {target: "window"})
-    monitorTendermintRpcHandler(event: CustomEvent){
-      this.updateEnableMonitorTendermintRpc(event.detail.checked);
+    @Listen("monitorCometbftRpc", {target: "window"})
+    monitorCometbftRpcHandler(event: CustomEvent){
+      this.updateEnableMonitorCometbftRpc(event.detail.checked);
     }
 
     @Listen("isValidator", {target: "window"})
@@ -84,7 +84,7 @@ export class PanicInstallerSourcesFormCosmosNode {
         if (this.node) {
             this.updateCosmosRestUrlToPing(this.node.cosmosRestUrl);
             this.updatePrometheusUrlToPing(this.node.prometheusUrl);
-            this.updateTendermintUrlToPing(this.node.tendermintRpcUrl);
+            this.updateCometbftUrlToPing(this.node.cometbftRpcUrl);
             this.updateNodeExporterUrlToPing(this.node.exporterUrl);
             if(!this.node.monitorCosmosRest){
               this.updateEnableMonitorCosmosRest(false);
@@ -95,8 +95,8 @@ export class PanicInstallerSourcesFormCosmosNode {
             if(!this.node.monitorSystem){
               this.updateEnableMonitorSystem(false);
             }
-            if(!this.node.monitorTendermintRpc){
-              this.updateEnableMonitorTendermintRpc(false);
+            if(!this.node.monitorCometbftRpc){
+              this.updateEnableMonitorCometbftRpc(false);
             }
             if(!this.node.isValidator){
               this.updateEnableMonitorOperatorAddress(false);
@@ -226,34 +226,34 @@ export class PanicInstallerSourcesFormCosmosNode {
 
                     <div class={"panic-installer-sources-form__input_test_box"}>
                         <svc-input
-                            name={'tendermintRpcUrl'}
+                            name={'cometbftRpcUrl'}
                             type={'url'}
-                            label={'Tendermint RPC URL'}
+                            label={'Cometbft RPC URL'}
                             lines={"inset"}
                             placeholder={'https://IP:26657'}
                             required={true}
-                            value={this.node?.tendermintRpcUrl}
-                            disabled={!this._enableMonitorTendermintRpc}
+                            value={this.node?.cometbftRpcUrl}
+                            disabled={!this._enableMonitorCometbftRpc}
                             //@ts-ignore
-                            onInput={(event) => this.updateTendermintUrlToPing(event.target.value)}
+                            onInput={(event) => this.updateCometbftUrlToPing(event.target.value)}
                         />
                         <svc-toggle
-                            name={'monitorTendermintRpc'}
-                            onChangeEventName={'monitorTendermintRpc'}
+                            name={'monitorCometbftRpc'}
+                            onChangeEventName={'monitorCometbftRpc'}
                             value={true}
                             label={'Monitor'}
                             lines={"none"}
-                            checked={this.node ? this.node.monitorTendermintRpc : true}
+                            checked={this.node ? this.node.monitorCometbftRpc : true}
                         />
                         <panic-installer-test-button
-                            service={'tendermint-rpc'}
-                            pingProperties={{'url': this.tendermintRpcUrlToPing}}
-                            identifier={this.tendermintRpcUrlToPing}
+                            service={'cometbft-rpc'}
+                            pingProperties={{'url': this.cometbftRpcUrlToPing}}
+                            identifier={this.cometbftRpcUrlToPing}
                         />
                     </div>
                 </div>
                 <div class={"panic-installer-sources-form__help-text"}>
-                    <span>This IP address will be used to obtain metrics from the Tendermint endpoint, if omitted they wil not be monitored and alerted on.</span>
+                    <span>This IP address will be used to obtain metrics from the Cometbft endpoint, if omitted they wil not be monitored and alerted on.</span>
                 </div>
 
                 <div class={'panic-installer-sources-form__row-container'}>

@@ -12,7 +12,7 @@ import {
 import Divider from '@material-ui/core/Divider';
 import InfoIcon from '@material-ui/icons/Info';
 import { MuiThemeProvider } from '@material-ui/core/styles';
-import { PingTendermint, PingCosmosRest, PingPrometheus } from 'utils/buttons';
+import { PingCometbft, PingCosmosRest, PingPrometheus } from 'utils/buttons';
 import { defaultTheme, theme } from 'components/theme/default';
 import Button from 'components/material_ui/CustomButtons/Button';
 import useStyles from 'assets/jss/material-kit-react/views/landingPageSections/productStyle';
@@ -259,13 +259,13 @@ const NodesForm = ({
                 </Grid>
                 <Grid item xs={8}>
                   <CssTextField
-                    id="tendermint-rpc-url-outlined-full-width"
-                    value={values.tendermint_rpc_url}
-                    label="Tendermint RPC URL"
+                    id="cometbft-rpc-url-outlined-full-width"
+                    value={values.cometbft_rpc_url}
+                    label="Cometbft RPC URL"
                     type="text"
                     style={{ margin: 8 }}
-                    name="tendermint_rpc_url"
-                    placeholder={data.nodeForm.tendermintRpcHolder}
+                    name="cometbft_rpc_url"
+                    placeholder={data.nodeForm.cometbftRpcHolder}
                     onChange={handleChange}
                     fullWidth
                     margin="normal"
@@ -278,7 +278,7 @@ const NodesForm = ({
                       endAdornment: (
                         <InputAdornment position="end">
                           <MuiThemeProvider theme={theme}>
-                            <Tooltip title={data.nodeForm.tendermintRpcTip} placement="left">
+                            <Tooltip title={data.nodeForm.cometbftRpcTip} placement="left">
                               <InfoIcon />
                             </Tooltip>
                           </MuiThemeProvider>
@@ -292,11 +292,11 @@ const NodesForm = ({
                     <FormControlLabel
                       control={(
                         <Switch
-                          checked={values.monitor_tendermint_rpc}
+                          checked={values.monitor_cometbft_rpc}
                           onClick={() => {
-                            setFieldValue('monitor_tendermint_rpc', !values.monitor_tendermint_rpc);
+                            setFieldValue('monitor_cometbft_rpc', !values.monitor_cometbft_rpc);
                           }}
-                          name="monitor_tendermint_rpc_system"
+                          name="monitor_cometbft_rpc_system"
                           color="primary"
                         />
                       )}
@@ -307,9 +307,9 @@ const NodesForm = ({
                 </Grid>
                 <Grid item xs={2}>
                   <Grid container direction="row" justifyContent="flex-end" alignItems="center">
-                    <PingTendermint
+                    <PingCometbft
                       disabled={false}
-                      httpUrl={values.tendermint_rpc_url}
+                      httpUrl={values.cometbft_rpc_url}
                     />
                   </Grid>
                 </Grid>
@@ -499,8 +499,8 @@ NodesForm.propTypes = {
     governance_addresses: PropTypes.arrayOf(PropTypes.string.isRequired),
     monitor_network: PropTypes.bool.isRequired,
     operator_address: PropTypes.string,
-    tendermint_rpc_url: PropTypes.string,
-    monitor_tendermint_rpc: PropTypes.bool.isRequired,
+    cometbft_rpc_url: PropTypes.string,
+    monitor_cometbft_rpc: PropTypes.bool.isRequired,
   }).isRequired,
   handleChange: PropTypes.func.isRequired,
   setFieldValue: PropTypes.func.isRequired,
@@ -518,8 +518,8 @@ NodesForm.propTypes = {
       prometheusTip: PropTypes.string.isRequired,
       exporterUrlHolder: PropTypes.string.isRequired,
       exporterUrlTip: PropTypes.string.isRequired,
-      tendermintRpcHolder: PropTypes.string.isRequired,
-      tendermintRpcTip: PropTypes.string.isRequired,
+      cometbftRpcHolder: PropTypes.string.isRequired,
+      cometbftRpcTip: PropTypes.string.isRequired,
       isValidatorTip: PropTypes.string.isRequired,
       isArchiveTip: PropTypes.string.isRequired,
       monitorNodeTip: PropTypes.string.isRequired,

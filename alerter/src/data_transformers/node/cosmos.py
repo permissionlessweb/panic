@@ -195,27 +195,27 @@ class CosmosNodeDataTransformer(DataTransformer):
 
         self.logger.debug(
             "Restored %s state: _went_down_at_prometheus=%s, "
-            "_went_down_at_cosmos_rest=%s, _went_down_at_tendermint_rpc=%s, "
+            "_went_down_at_cosmos_rest=%s, _went_down_at_cometbft_rpc=%s, "
             "_current_height=%s, _voting_power=%s, _is_syncing=%s, "
             "_bond_status=%s, _jailed=%s, _slashed=%s, _missed_blocks=%s, "
-            "_last_monitored_prometheus=%s, _last_monitored_tendermint_rpc=%s, "
+            "_last_monitored_prometheus=%s, _last_monitored_cometbft_rpc=%s, "
             "_last_monitored_cosmos_rest=%s", cosmos_node,
             cosmos_node.went_down_at_prometheus,
             cosmos_node.went_down_at_cosmos_rest,
-            cosmos_node.went_down_at_tendermint_rpc, cosmos_node.current_height,
+            cosmos_node.went_down_at_cometbft_rpc, cosmos_node.current_height,
             cosmos_node.voting_power, cosmos_node.is_syncing,
             cosmos_node.bond_status, cosmos_node.jailed, cosmos_node.slashed,
             cosmos_node.missed_blocks, cosmos_node.last_monitored_prometheus,
-            cosmos_node.last_monitored_tendermint_rpc,
+            cosmos_node.last_monitored_cometbft_rpc,
             cosmos_node.last_monitored_cosmos_rest
         )
 
         return cosmos_node
 
-    def _update_tendermint_rpc_state(self, tendermint_rpc_data: Dict) -> None:
-        if 'result' in tendermint_rpc_data:
-            meta_data = tendermint_rpc_data['result']['meta_data']
-            metrics = tendermint_rpc_data['result']['data']
+    def _update_cometbft_rpc_state(self, cometbft_rpc_data: Dict) -> None:
+        if 'result' in cometbft_rpc_data:
+            meta_data = cometbft_rpc_data['result']['meta_data']
+            metrics = cometbft_rpc_data['result']['data']
             node_id = meta_data['node_id']
             parent_id = meta_data['node_parent_id']
             node_name = meta_data['node_name']
@@ -228,17 +228,17 @@ class CosmosNodeDataTransformer(DataTransformer):
             node.set_slashed(metrics['slashed'])
             node.set_missed_blocks(metrics['missed_blocks'])
             node.set_is_syncing(metrics['is_syncing'])
-            ## check if the node was a mev-tendermint node and update state if so
-            if meta_data['is_mev_tendermint_node']:
+            ## check if the node was a mev-cometbft node and update state if so
+            if meta_data['is_mev_cometbft_node']:
                 node.set_is_peered_with_sentinel(metrics['is_peered_with_sentinel'])
             else:
                 # If a node has changed its config, this will be reflected in is_peered_with_sentinel
                 node.set_is_peered_with_sentinel(None)
-            node.set_last_monitored_tendermint_rpc(meta_data['last_monitored'])
-            node.set_tendermint_rpc_as_up()
-        elif 'error' in tendermint_rpc_data:
-            meta_data = tendermint_rpc_data['error']['meta_data']
-            error_code = tendermint_rpc_data['error']['code']
+            node.set_last_monitored_cometbft_rpc(meta_data['last_monitored'])
+            node.set_cometbft_rpc_as_up()
+        elif 'error' in cometbft_rpc_data:
+            meta_data = cometbft_rpc_data['error']['meta_data']
+            error_code = cometbft_rpc_data['error']['code']
             node_id = meta_data['node_id']
             parent_id = meta_data['node_parent_id']
             node_name = meta_data['node_name']
@@ -250,12 +250,12 @@ class CosmosNodeDataTransformer(DataTransformer):
             node.set_node_name(node_name)
 
             if error_code == downtime_exception.code:
-                new_went_down_at = tendermint_rpc_data['error']['data'][
+                new_went_down_at = cometbft_rpc_data['error']['data'][
                     'went_down_at']
-                node.set_tendermint_rpc_as_down(new_went_down_at)
+                node.set_cometbft_rpc_as_down(new_went_down_at)
         else:
             raise ReceivedUnexpectedDataException(
-                "{}: _update_tendermint_rpc_state".format(self))
+                "{}: _update_cometbft_rpc_state".format(self))
 
     def _update_cosmos_rest_state(self, cosmos_rest_data: Dict) -> None:
         if 'result' in cosmos_rest_data:
@@ -339,7 +339,7 @@ class CosmosNodeDataTransformer(DataTransformer):
         update_helper = {
             'prometheus': self._update_prometheus_state,
             'cosmos_rest': self._update_cosmos_rest_state,
-            'tendermint_rpc': self._update_tendermint_rpc_state,
+            'cometbft_rpc': self._update_cometbft_rpc_state,
         }
 
         for data_type, update_fn in update_helper.items():
@@ -378,14 +378,14 @@ class CosmosNodeDataTransformer(DataTransformer):
 
         return copy.deepcopy(transformed_data)
 
-    def _process_transformed_tendermint_rpc_data_for_alerting(
-            self, transformed_tendermint_rpc_data: Dict) -> Dict:
-        if 'result' in transformed_tendermint_rpc_data:
-            td_meta_data = transformed_tendermint_rpc_data['result'][
+    def _process_transformed_cometbft_rpc_data_for_alerting(
+            self, transformed_cometbft_rpc_data: Dict) -> Dict:
+        if 'result' in transformed_cometbft_rpc_data:
+            td_meta_data = transformed_cometbft_rpc_data['result'][
                 'meta_data']
             td_node_id = td_meta_data['node_id']
             node: CosmosNode = self.state[td_node_id]
-            td_metrics = transformed_tendermint_rpc_data['result']['data']
+            td_metrics = transformed_cometbft_rpc_data['result']['data']
 
             processed_data = {
                 'result': {
@@ -404,25 +404,25 @@ class CosmosNodeDataTransformer(DataTransformer):
 
             # Add previous for each metric
             pd_data['went_down_at'][
-                'previous'] = node.went_down_at_tendermint_rpc
+                'previous'] = node.went_down_at_cometbft_rpc
             pd_data['slashed']['previous'] = copy.deepcopy(node.slashed)
             pd_data['missed_blocks']['previous'] = copy.deepcopy(
                 node.missed_blocks)
             pd_data['is_syncing']['previous'] = node.is_syncing
-            ## Check if the current node is a mev-tendermint node, if so send the previous state of the mev-tendermint metrics
-            if td_meta_data['is_mev_tendermint_node']:
+            ## Check if the current node is a mev-cometbft node, if so send the previous state of the mev-cometbft metrics
+            if td_meta_data['is_mev_cometbft_node']:
                 pd_data['is_peered_with_sentinel']['previous'] = node.is_peered_with_sentinel
-        elif 'error' in transformed_tendermint_rpc_data:
-            td_meta_data = transformed_tendermint_rpc_data['error']['meta_data']
-            td_error_code = transformed_tendermint_rpc_data['error']['code']
+        elif 'error' in transformed_cometbft_rpc_data:
+            td_meta_data = transformed_cometbft_rpc_data['error']['meta_data']
+            td_error_code = transformed_cometbft_rpc_data['error']['code']
             td_node_id = td_meta_data['node_id']
             td_node_name = td_meta_data['node_name']
             node: CosmosNode = self.state[td_node_id]
             downtime_exception = NodeIsDownException(td_node_name)
 
-            processed_data = copy.deepcopy(transformed_tendermint_rpc_data)
+            processed_data = copy.deepcopy(transformed_cometbft_rpc_data)
             if td_error_code == downtime_exception.code:
-                td_data = transformed_tendermint_rpc_data['error']['data']
+                td_data = transformed_cometbft_rpc_data['error']['data']
                 pd_data = processed_data['error']['data']
 
                 for metric, value in td_data.items():
@@ -430,10 +430,10 @@ class CosmosNodeDataTransformer(DataTransformer):
                     pd_data[metric]['current'] = value
 
                 pd_data['went_down_at'][
-                    'previous'] = node.went_down_at_tendermint_rpc
+                    'previous'] = node.went_down_at_cometbft_rpc
         else:
             raise ReceivedUnexpectedDataException(
-                "{}: _process_transformed_tendermint_rpc_data_for_"
+                "{}: _process_transformed_cometbft_rpc_data_for_"
                 "alerting".format(self))
 
         return processed_data
@@ -551,13 +551,13 @@ class CosmosNodeDataTransformer(DataTransformer):
                 self._process_transformed_prometheus_data_for_alerting,
             'cosmos_rest':
                 self._process_transformed_cosmos_rest_data_for_alerting,
-            'tendermint_rpc':
-                self._process_transformed_tendermint_rpc_data_for_alerting,
+            'cometbft_rpc':
+                self._process_transformed_cometbft_rpc_data_for_alerting,
         }
         processed_data = {
             'prometheus': {},
             'cosmos_rest': {},
-            'tendermint_rpc': {},
+            'cometbft_rpc': {},
         }
 
         for data_type, processing_fn in processing_helper.items():
@@ -576,11 +576,11 @@ class CosmosNodeDataTransformer(DataTransformer):
 
         return processed_data
 
-    def _transform_tendermint_rpc_data(self, tendermint_rpc_data: Dict) -> Dict:
-        if 'result' in tendermint_rpc_data:
-            meta_data = tendermint_rpc_data['result']['meta_data']
-            node_metrics = tendermint_rpc_data['result']['data']
-            transformed_data = copy.deepcopy(tendermint_rpc_data)
+    def _transform_cometbft_rpc_data(self, cometbft_rpc_data: Dict) -> Dict:
+        if 'result' in cometbft_rpc_data:
+            meta_data = cometbft_rpc_data['result']['meta_data']
+            node_metrics = cometbft_rpc_data['result']['data']
+            transformed_data = copy.deepcopy(cometbft_rpc_data)
             td_meta_data = transformed_data['result']['meta_data']
             td_node_metrics = transformed_data['result']['data']
             node_id = meta_data['node_id']
@@ -639,9 +639,9 @@ class CosmosNodeDataTransformer(DataTransformer):
             del td_meta_data['time']
             td_meta_data['last_monitored'] = meta_data['time']
             td_node_metrics['went_down_at'] = None
-        elif 'error' in tendermint_rpc_data:
-            meta_data = tendermint_rpc_data['error']['meta_data']
-            error_code = tendermint_rpc_data['error']['code']
+        elif 'error' in cometbft_rpc_data:
+            meta_data = cometbft_rpc_data['error']['meta_data']
+            error_code = cometbft_rpc_data['error']['code']
             node_id = meta_data['node_id']
             node_name = meta_data['node_name']
             time_of_error = meta_data['time']
@@ -650,23 +650,23 @@ class CosmosNodeDataTransformer(DataTransformer):
 
             # In case of non-downtime errors only remove the monitor_name from
             # the meta data
-            transformed_data = copy.deepcopy(tendermint_rpc_data)
+            transformed_data = copy.deepcopy(cometbft_rpc_data)
             del transformed_data['error']['meta_data']['monitor_name']
 
-            # If we have a downtime error, set went_down_at_tendermint_rpc to
+            # If we have a downtime error, set went_down_at_cometbft_rpc to
             # the time of error if the interface was up. Otherwise, leave
-            # went_down_at_tendermint_rpc as stored in the node state
+            # went_down_at_cometbft_rpc as stored in the node state
             if error_code == downtime_exception.code:
                 transformed_data['error']['data'] = {}
                 td_metrics = transformed_data['error']['data']
                 td_metrics['went_down_at'] = (
-                    node.went_down_at_tendermint_rpc
-                    if node.is_down_tendermint_rpc
+                    node.went_down_at_cometbft_rpc
+                    if node.is_down_cometbft_rpc
                     else time_of_error
                 )
         else:
             raise ReceivedUnexpectedDataException(
-                "{}: _transform_tendermint_rpc_data".format(self))
+                "{}: _transform_cometbft_rpc_data".format(self))
 
         return transformed_data
 
@@ -775,12 +775,12 @@ class CosmosNodeDataTransformer(DataTransformer):
         transformation_helper = {
             'prometheus': self._transform_prometheus_data,
             'cosmos_rest': self._transform_cosmos_rest_data,
-            'tendermint_rpc': self._transform_tendermint_rpc_data,
+            'cometbft_rpc': self._transform_cometbft_rpc_data,
         }
         transformed_data = {
             'prometheus': {},
             'cosmos_rest': {},
-            'tendermint_rpc': {},
+            'cometbft_rpc': {},
         }
 
         for data_type, transformation_fn in transformation_helper.items():

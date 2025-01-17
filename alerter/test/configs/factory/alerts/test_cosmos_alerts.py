@@ -30,8 +30,8 @@ class TestCosmosAlertsConfigsFactory(unittest.TestCase):
             'cannot_access_prometheus_node',
             'cannot_access_cosmos_rest_validator',
             'cannot_access_cosmos_rest_node',
-            'cannot_access_tendermint_rpc_validator',
-            'cannot_access_tendermint_rpc_node', 'missed_blocks', 'slashed',
+            'cannot_access_cometbft_rpc_validator',
+            'cannot_access_cometbft_rpc_node', 'missed_blocks', 'slashed',
             'node_is_syncing', 'validator_is_syncing',
             'node_is_peered_with_sentinel', 'validator_is_peered_with_sentinel',
             'validator_not_active_in_session', 'validator_is_jailed'
@@ -103,10 +103,10 @@ class TestCosmosAlertsConfigsFactory(unittest.TestCase):
                 "cannot_access_cosmos_rest_validator"],
             cannot_access_cosmos_rest_node=filtered_1_cosmos_node[
                 "cannot_access_cosmos_rest_node"],
-            cannot_access_tendermint_rpc_validator=filtered_1_cosmos_node[
-                "cannot_access_tendermint_rpc_validator"],
-            cannot_access_tendermint_rpc_node=filtered_1_cosmos_node[
-                "cannot_access_tendermint_rpc_node"],
+            cannot_access_cometbft_rpc_validator=filtered_1_cosmos_node[
+                "cannot_access_cometbft_rpc_validator"],
+            cannot_access_cometbft_rpc_node=filtered_1_cosmos_node[
+                "cannot_access_cometbft_rpc_node"],
             missed_blocks=filtered_1_cosmos_node["missed_blocks"],
             slashed=filtered_1_cosmos_node["slashed"],
             node_is_syncing=filtered_1_cosmos_node["node_is_syncing"],
@@ -137,10 +137,10 @@ class TestCosmosAlertsConfigsFactory(unittest.TestCase):
                 "cannot_access_cosmos_rest_validator"],
             cannot_access_cosmos_rest_node=filtered_2_cosmos_node[
                 "cannot_access_cosmos_rest_node"],
-            cannot_access_tendermint_rpc_validator=filtered_2_cosmos_node[
-                "cannot_access_tendermint_rpc_validator"],
-            cannot_access_tendermint_rpc_node=filtered_2_cosmos_node[
-                "cannot_access_tendermint_rpc_node"],
+            cannot_access_cometbft_rpc_validator=filtered_2_cosmos_node[
+                "cannot_access_cometbft_rpc_validator"],
+            cannot_access_cometbft_rpc_node=filtered_2_cosmos_node[
+                "cannot_access_cometbft_rpc_node"],
             missed_blocks=filtered_2_cosmos_node["missed_blocks"],
             slashed=filtered_2_cosmos_node["slashed"],
             node_is_syncing=filtered_2_cosmos_node["node_is_syncing"],

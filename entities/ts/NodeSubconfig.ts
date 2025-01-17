@@ -21,8 +21,8 @@ export class NodeSubconfig extends Base {
     private _useAsDataSource: boolean = null;
     private _monitorNetwork: boolean = null;
     private _operatorAddress: string = null;
-    private _monitorTendermintRpc: boolean = null;
-    private _tendermintRpcUrl: string = null;
+    private _monitorCometbftRpc: boolean = null;
+    private _cometbftRpcUrl: string = null;
     private _nodeWsUrl: string = null;
     private _stashAddress: string = null;
     private _governanceAddresses: string = null;
@@ -156,19 +156,19 @@ export class NodeSubconfig extends Base {
     }
 
     /**
-     * Monitor Tendermint RPC flag
+     * Monitor Cometbft RPC flag
      * @type boolean
      */
-    public get monitorTendermintRpc(): boolean {
-        return this._monitorTendermintRpc;
+    public get monitorCometbftRpc(): boolean {
+        return this._monitorCometbftRpc;
     }
 
     /**
-     * URLs (separeted by comma) for Tendermint RPC
+     * URLs (separeted by comma) for Cometbft RPC
      * @type string
      */
-    public get tendermintRpcUrl(): string {
-        return this._tendermintRpcUrl;
+    public get cometbftRpcUrl(): string {
+        return this._cometbftRpcUrl;
     }
 
     /**
@@ -259,12 +259,12 @@ export class NodeSubconfig extends Base {
         this._operatorAddress = value;
     }
 
-    public set monitorTendermintRpc(value: boolean) {
-        this._monitorTendermintRpc = value;
+    public set monitorCometbftRpc(value: boolean) {
+        this._monitorCometbftRpc = value;
     }
 
-    public set tendermintRpcUrl(value: string) {
-        this._tendermintRpcUrl = value;
+    public set cometbftRpcUrl(value: string) {
+        this._cometbftRpcUrl = value;
     }
 
     public set nodeWsUrl(value: string) {
@@ -305,8 +305,8 @@ export class NodeSubconfig extends Base {
             useAsDataSource: this.useAsDataSource,
             monitorNetwork: this.monitorNetwork,
             operatorAddress: this.operatorAddress,
-            monitorTendermintRpc: this.monitorTendermintRpc,
-            tendermintRpcUrl: this.tendermintRpcUrl,
+            monitorCometbftRpc: this.monitorCometbftRpc,
+            cometbftRpcUrl: this.cometbftRpcUrl,
             nodeWsUrl: this.nodeWsUrl,
             stashAddress: this.stashAddress,
             governanceAddresses: this.governanceAddresses

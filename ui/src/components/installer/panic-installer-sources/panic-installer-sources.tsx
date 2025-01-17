@@ -194,8 +194,8 @@ export class PanicInstallerSources {
                         useAsDataSource: HelperAPI.isTruthy(node.useAsDataSource),
                         monitorNetwork: this.monitorNetwork,
                         operatorAddress: node.operatorAddress,
-                        monitorTendermintRpc: HelperAPI.isTruthy(node.monitorTendermintRpc),
-                        tendermintRpcUrl: node.tendermintRpcUrl,
+                        monitorCometbftRpc: HelperAPI.isTruthy(node.monitorCometbftRpc),
+                        cometbftRpcUrl: node.cometbftRpcUrl,
                         nodeWsUrl: node.nodeWsUrl,
                         stashAddress: node.stashAddress,
                         governanceAddresses: this.governanceAddresses

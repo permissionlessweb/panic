@@ -11,7 +11,7 @@ from requests.exceptions import (ConnectionError as ReqConnectionError,
 from urllib3.exceptions import ProtocolError
 
 from src.api_wrappers.cosmos import (
-    CosmosRestServerApiWrapper, TendermintRpcApiWrapper)
+    CosmosRestServerApiWrapper, CometbftRpcApiWrapper)
 from src.configs.nodes.cosmos import CosmosNodeConfig
 from src.message_broker.rabbitmq import RabbitMQApi
 from src.monitors.monitor import Monitor
@@ -20,14 +20,14 @@ from src.utils.exceptions import (
     ComponentNotGivenEnoughDataSourcesException,
     CosmosRestServerApiCallException, CannotConnectWithDataSourceException,
     DataReadingException, InvalidUrlException,
-    TendermintRPCIncompatibleException, TendermintRPCCallException,
+    CometbftRPCIncompatibleException, CometbftRPCCallException,
     NodeIsDownException, PANICException)
 
 _REST_VERSION_COSMOS_SDK_0_39_2 = 'v0.39.2'
 _REST_VERSION_COSMOS_SDK_0_42_6 = 'v0.42.6'
 _VERSION_INCOMPATIBILITY_EXCEPTIONS = [
     IncorrectJSONRetrievedException, CosmosSDKVersionIncompatibleException,
-    TendermintRPCIncompatibleException
+    CometbftRPCIncompatibleException
 ]
 
 
@@ -44,7 +44,7 @@ class CosmosMonitor(Monitor, ABC):
         super().__init__(monitor_name, logger, monitor_period, rabbitmq)
         self._data_sources = data_sources
         self._cosmos_rest_server_api = CosmosRestServerApiWrapper(self.logger)
-        self._tendermint_rpc_api = TendermintRpcApiWrapper(self.logger)
+        self._cometbft_rpc_api = CometbftRpcApiWrapper(self.logger)
 
         # This variable stores the latest REST version used to retrieve the
         # data. By default, it is set to v0.42.6 of the Cosmos SDK.
@@ -59,8 +59,8 @@ class CosmosMonitor(Monitor, ABC):
         return self._cosmos_rest_server_api
 
     @property
-    def tendermint_rpc_api(self) -> TendermintRpcApiWrapper:
-        return self._tendermint_rpc_api
+    def cometbft_rpc_api(self) -> CometbftRpcApiWrapper:
+        return self._cometbft_rpc_api
 
     @property
     def last_rest_retrieval_version(self) -> str:
@@ -103,35 +103,35 @@ class CosmosMonitor(Monitor, ABC):
 
         return None
 
-    def _select_cosmos_tendermint_node(
+    def _select_cosmos_cometbft_node(
             self, nodes: List[CosmosNodeConfig]) -> Optional[CosmosNodeConfig]:
         """
         This function returns the configuration of the selected node. A node is
-        selected only if its tendermint_rpc_url is reachable and the node is
+        selected only if its cometbft_rpc_url is reachable and the node is
         synced.
         :param nodes: The list of nodes to select from
         :return: The node config of the selected node.
                : None if no node is selected.
         """
-        nodes = [node for node in nodes if node.tendermint_rpc_url]
+        nodes = [node for node in nodes if node.cometbft_rpc_url]
         for node in nodes:
-            tendermint_rpc_url = node.tendermint_rpc_url
+            cometbft_rpc_url = node.cometbft_rpc_url
             try:
-                api_ret = self.tendermint_rpc_api.execute_with_checks(
-                    self.tendermint_rpc_api.get_status, [tendermint_rpc_url],
+                api_ret = self.cometbft_rpc_api.execute_with_checks(
+                    self.cometbft_rpc_api.get_status, [cometbft_rpc_url],
                     node.node_name)
                 syncing = api_ret['result']['sync_info']['catching_up']
                 if not syncing:
-                    self.logger.debug('chosen %s.', tendermint_rpc_url)
+                    self.logger.debug('chosen %s.', cometbft_rpc_url)
                     return node
             except (ReqConnectionError, ReadTimeout, InvalidURL, InvalidSchema,
                     MissingSchema, IncompleteRead, ChunkedEncodingError,
-                    ProtocolError, TendermintRPCCallException,
-                    TendermintRPCIncompatibleException, KeyError) as e:
+                    ProtocolError, CometbftRPCCallException,
+                    CometbftRPCIncompatibleException, KeyError) as e:
                 # If an expected error occurs we will log the error and re-try
                 # again with another node.
                 self.logger.debug("Error when trying to access %s: %s",
-                                  tendermint_rpc_url, e)
+                                  cometbft_rpc_url, e)
 
         return None
 
@@ -208,7 +208,7 @@ class CosmosMonitor(Monitor, ABC):
                  a valid schema
                : IncorrectJSONRetrievedException if the structure of the data
                  returned by the endpoints is not as expected. This could be
-                 both due to a Tendermint update or a Cosmos SDK update
+                 both due to a Cometbft update or a Cosmos SDK update
         """
         try:
             return function()
@@ -230,28 +230,28 @@ class CosmosMonitor(Monitor, ABC):
             raise InvalidUrlException(source_rest_url)
         except KeyError as e:
             # If a key error occurs while parsing the retrieved data, this
-            # means that the source's cosmos sdk or Tendermint versions are
+            # means that the source's cosmos sdk or Cometbft versions are
             # not compatible with either <sdk_version> of cosmos sdk or v0.33.7,
-            # v0.33.8, v0.33.9, v0.34.11, v0.34.12 of Tendermint.
+            # v0.33.8, v0.33.9, v0.34.11, v0.34.12 of Cometbft.
             self.logger.exception(e)
             self.logger.error(
-                'The Cosmos SDK or Tendermint versions of data source {} are '
+                'The Cosmos SDK or Cometbft versions of data source {} are '
                 'incompatible with version {} of the Cosmos SDK or v0.33.7, '
-                'v0.33.8, v0.33.9, v0.34.11, v0.34.12 of Tendermint.'.format(
+                'v0.33.8, v0.33.9, v0.34.11, v0.34.12 of Cometbft.'.format(
                     source_name, sdk_version))
             raise IncorrectJSONRetrievedException(
                 'Cosmos REST Server {} Cosmos SDK'.format(sdk_version), repr(e))
 
-    def _execute_cosmos_tendermint_retrieval_with_exceptions(
+    def _execute_cosmos_cometbft_retrieval_with_exceptions(
             self, function: Callable, source_name: str,
-            source_tendermint_url: str, direct_retrieval: bool) -> Dict:
+            source_cometbft_url: str, direct_retrieval: bool) -> Dict:
         """
-        This helper executes the Tendermint RPC Data retrieval procedure with
+        This helper executes the Cometbft RPC Data retrieval procedure with
         some exception handling.
-        :param function: The Tendermint Data retrieval procedure
+        :param function: The Cometbft Data retrieval procedure
         :param source_name: The name of the data source being used to retrieve
-                          : the Tendermint RPC data
-        :param source_tendermint_url: The Tendermint RPC Url of the data source
+                          : the Cometbft RPC data
+        :param source_cometbft_url: The Cometbft RPC Url of the data source
         :param direct_retrieval: Whether the data retrieval procedure is being
                                : performed on the node being monitored (True) or
                                : using another node as data source (False)
@@ -260,23 +260,23 @@ class CosmosMonitor(Monitor, ABC):
                : CannotConnectWithDataSourceException if we cannot connect with
                  the data source (only for indirect/archive data retrieval)
                : NodeIsDownException if the node being monitored cannot be
-                 directly accessed at the tendermint rpc endpoint
+                 directly accessed at the cometbft rpc endpoint
                : InvalidUrlException if the URL of the data source does not have
                  a valid schema
                : IncorrectJSONRetrievedException if the structure of the data
                  returned by the endpoints is not as expected. This could be
-                 both due to a Tendermint or a Tendermint RPC update
+                 both due to a Cometbft or a Cometbft RPC update
         """
         try:
             return function()
         except (ReqConnectionError, ReadTimeout) as e:
             # If we are performing a direct data retrieval, this means that for
-            # the Tendermint RPC retrieval the node is down. Otherwise, it means
+            # the Cometbft RPC retrieval the node is down. Otherwise, it means
             # that the indirect data source cannot be reached (Note, node
             # downtime would be tackled by the monitor dedicated to that node)
             self.logger.exception(e)
-            self.logger.error("Tendermint RPC data could not be obtained from "
-                              "{}. Error: {}".format(source_tendermint_url, e))
+            self.logger.error("Cometbft RPC data could not be obtained from "
+                              "{}. Error: {}".format(source_cometbft_url, e))
             if direct_retrieval:
                 raise NodeIsDownException(source_name)
             else:
@@ -284,23 +284,23 @@ class CosmosMonitor(Monitor, ABC):
                     self.monitor_name, source_name, repr(e))
         except (IncompleteRead, ChunkedEncodingError, ProtocolError) as e:
             self.logger.exception(e)
-            self.logger.error("Tendermint RPC data could not be obtained from "
-                              "{}. Error: {}".format(source_tendermint_url, e))
-            raise DataReadingException(self.monitor_name, source_tendermint_url)
+            self.logger.error("Cometbft RPC data could not be obtained from "
+                              "{}. Error: {}".format(source_cometbft_url, e))
+            raise DataReadingException(self.monitor_name, source_cometbft_url)
         except (InvalidURL, InvalidSchema, MissingSchema) as e:
             self.logger.exception(e)
-            self.logger.error("Tendermint RPC data could not be obtained from "
-                              "{}. Error: {}".format(source_tendermint_url, e))
-            raise InvalidUrlException(source_tendermint_url)
+            self.logger.error("Cometbft RPC data could not be obtained from "
+                              "{}. Error: {}".format(source_cometbft_url, e))
+            raise InvalidUrlException(source_cometbft_url)
         except KeyError as e:
             # If a key error occurs while parsing the retrieved data, this
-            # means that the source's Tendermint or Tendermint RPC versions are
+            # means that the source's Cometbft or Cometbft RPC versions are
             # not compatible with PANIC
             self.logger.exception(e)
             self.logger.error(
-                'The Tendermint or Tendermint RPC versions of data source {} '
+                'The Cometbft or Cometbft RPC versions of data source {} '
                 'are incompatible with PANIC'.format(source_name))
-            raise IncorrectJSONRetrievedException('Cosmos Tendermint RPC',
+            raise IncorrectJSONRetrievedException('Cosmos Cometbft RPC',
                                                   repr(e))
 
     def _get_rest_data_with_pagination_keys(
@@ -342,15 +342,15 @@ class CosmosMonitor(Monitor, ABC):
 
         return paginated_data
 
-    def _get_tendermint_data_with_count(
+    def _get_cometbft_data_with_count(
             self, function, args: List[Any], params: Dict,
             node_name: str) -> List[Dict]:
         """
-        This function executes a Tendermint RPC API call with pages in mind. For
-        Tendermint, some endpoints subdivide the data into a number of pages.
+        This function executes a Cometbft RPC API call with pages in mind. For
+        Cometbft, some endpoints subdivide the data into a number of pages.
         These pages can be traversed by counting the number of entries in each
         page until we reach the total number of entries.
-        :param function: The Tendermint RPC API call to execute
+        :param function: The Cometbft RPC API call to execute
         :param args: The arguments to pass to the RPC call
         :param params: The params that should also be passed as arguments. These
                        need to be specified independently because the callee may
@@ -373,7 +373,7 @@ class CosmosMonitor(Monitor, ABC):
         while counter < total or first_call:
             params = copy.deepcopy(params)  # To avoid side-effects
             params['page'] = page
-            ret = self.tendermint_rpc_api.execute_with_checks(
+            ret = self.cometbft_rpc_api.execute_with_checks(
                 function, args + [params], node_name)
             data.append(ret)
             if first_call:

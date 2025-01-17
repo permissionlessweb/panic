@@ -472,14 +472,14 @@
         }
       }
     },
-    "/server/cosmos/tendermint-rpc": {
+    "/server/cosmos/cometbft-rpc": {
       "post": {
         "tags": [
           "Pings > Cosmos"
         ],
-        "summary": "Pings endpoint to verify a valid Tendermint RPC URL.",
+        "summary": "Pings endpoint to verify a valid Cometbft RPC URL.",
         "requestBody": {
-          "description": "Tendermint RPC URL to be pinged.",
+          "description": "Cometbft RPC URL to be pinged.",
           "required": true,
           "content": {
             "application/json": {
@@ -3592,7 +3592,7 @@
                 "monitor": true,
                 "created": "2022-05-02T22:02:46.000Z",
                 "modified": null,
-                "name": "tendermint/tendermint/",
+                "name": "cometbft/cometbft/",
                 "namespace": null,
                 "type": {
                   "id": "628bdacb5c5ab4c82d151aa4",
@@ -3609,8 +3609,8 @@
                 "monitor": true,
                 "created": "2022-05-02T22:02:46.000Z",
                 "modified": null,
-                "name": "tendermint",
-                "namespace": "tendermint",
+                "name": "cometbft",
+                "namespace": "cometbft",
                 "type": {
                   "id": "628bdafa5c5ab4c82d151aa5",
                   "status": true,

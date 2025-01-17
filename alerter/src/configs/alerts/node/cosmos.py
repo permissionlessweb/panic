@@ -11,8 +11,8 @@ class CosmosNodeAlertsConfig:
             cannot_access_prometheus_node: Dict,
             cannot_access_cosmos_rest_validator: Dict,
             cannot_access_cosmos_rest_node: Dict,
-            cannot_access_tendermint_rpc_validator: Dict,
-            cannot_access_tendermint_rpc_node: Dict, missed_blocks: Dict,
+            cannot_access_cometbft_rpc_validator: Dict,
+            cannot_access_cometbft_rpc_node: Dict, missed_blocks: Dict,
             slashed: Dict, node_is_syncing: Dict, validator_is_syncing: Dict,
             validator_is_jailed: Dict,
             node_is_peered_with_sentinel: Dict = None, validator_is_peered_with_sentinel: Dict = None) -> None:
@@ -30,10 +30,10 @@ class CosmosNodeAlertsConfig:
         self._cannot_access_cosmos_rest_validator = (
             cannot_access_cosmos_rest_validator)
         self._cannot_access_cosmos_rest_node = cannot_access_cosmos_rest_node
-        self._cannot_access_tendermint_rpc_validator = (
-            cannot_access_tendermint_rpc_validator)
-        self._cannot_access_tendermint_rpc_node = (
-            cannot_access_tendermint_rpc_node)
+        self._cannot_access_cometbft_rpc_validator = (
+            cannot_access_cometbft_rpc_validator)
+        self._cannot_access_cometbft_rpc_node = (
+            cannot_access_cometbft_rpc_node)
         self._missed_blocks = missed_blocks
         self._slashed = slashed
         self._node_is_syncing = node_is_syncing
@@ -90,12 +90,12 @@ class CosmosNodeAlertsConfig:
         return self._cannot_access_cosmos_rest_node
 
     @property
-    def cannot_access_tendermint_rpc_validator(self) -> Dict:
-        return self._cannot_access_tendermint_rpc_validator
+    def cannot_access_cometbft_rpc_validator(self) -> Dict:
+        return self._cannot_access_cometbft_rpc_validator
 
     @property
-    def cannot_access_tendermint_rpc_node(self) -> Dict:
-        return self._cannot_access_tendermint_rpc_node
+    def cannot_access_cometbft_rpc_node(self) -> Dict:
+        return self._cannot_access_cometbft_rpc_node
 
     @property
     def missed_blocks(self) -> Dict:

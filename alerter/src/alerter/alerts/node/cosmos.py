@@ -288,21 +288,21 @@ class CosmosRestValidUrlAlert(ValidUrlAlert):
             alert_code, metric_code)
 
 
-class TendermintRPCInvalidUrlAlert(InvalidUrlAlert):
+class CometbftRPCInvalidUrlAlert(InvalidUrlAlert):
     def __init__(self, origin_name: str, message: str, severity: str,
                  timestamp: float, parent_id: str, origin_id: str) -> None:
-        alert_code = CosmosNodeAlertCode.TendermintRPCInvalidUrlAlert
-        metric_code = GroupedCosmosNodeAlertsMetricCode.TendermintRPCInvalidUrl
+        alert_code = CosmosNodeAlertCode.CometbftRPCInvalidUrlAlert
+        metric_code = GroupedCosmosNodeAlertsMetricCode.CometbftRPCInvalidUrl
         super().__init__(
             origin_name, message, severity, timestamp, parent_id, origin_id,
             alert_code, metric_code)
 
 
-class TendermintRPCValidUrlAlert(ValidUrlAlert):
+class CometbftRPCValidUrlAlert(ValidUrlAlert):
     def __init__(self, origin_name: str, message: str, severity: str,
                  timestamp: float, parent_id: str, origin_id: str) -> None:
-        alert_code = CosmosNodeAlertCode.TendermintRPCValidUrlAlert
-        metric_code = GroupedCosmosNodeAlertsMetricCode.TendermintRPCInvalidUrl
+        alert_code = CosmosNodeAlertCode.CometbftRPCValidUrlAlert
+        metric_code = GroupedCosmosNodeAlertsMetricCode.CometbftRPCInvalidUrl
         super().__init__(
             origin_name, message, severity, timestamp, parent_id, origin_id,
             alert_code, metric_code)
@@ -408,40 +408,40 @@ class CosmosRestSourceBackUpAgainAlert(SourceBackUpAgainAlert):
             'cosmos-rest', alert_code, metric_code)
 
 
-class TendermintRPCSourceIsDownAlert(SourceIsDownAlert):
+class CometbftRPCSourceIsDownAlert(SourceIsDownAlert):
     def __init__(self, origin_name: str, severity: str, timestamp: float,
                  parent_id: str, origin_id: str) -> None:
-        alert_code = CosmosNodeAlertCode.TendermintRPCSourceIsDownAlert
+        alert_code = CosmosNodeAlertCode.CometbftRPCSourceIsDownAlert
         metric_code = (
-            GroupedCosmosNodeAlertsMetricCode.TendermintRPCSourceIsDown
+            GroupedCosmosNodeAlertsMetricCode.CometbftRPCSourceIsDown
         )
         super().__init__(
             origin_name, severity, timestamp, parent_id, origin_id,
-            'tendermint-rpc', alert_code, metric_code)
+            'cometbft-rpc', alert_code, metric_code)
 
 
-class TendermintRPCSourceStillDownAlert(SourceStillDownAlert):
+class CometbftRPCSourceStillDownAlert(SourceStillDownAlert):
     def __init__(self, origin_name: str, difference: float, severity: str,
                  timestamp: float, parent_id: str, origin_id: str) -> None:
-        alert_code = CosmosNodeAlertCode.TendermintRPCSourceStillDownAlert
+        alert_code = CosmosNodeAlertCode.CometbftRPCSourceStillDownAlert
         metric_code = (
-            GroupedCosmosNodeAlertsMetricCode.TendermintRPCSourceIsDown
+            GroupedCosmosNodeAlertsMetricCode.CometbftRPCSourceIsDown
         )
         super().__init__(
             origin_name, difference, severity, timestamp, parent_id, origin_id,
-            'tendermint-rpc', alert_code, metric_code)
+            'cometbft-rpc', alert_code, metric_code)
 
 
-class TendermintRPCSourceBackUpAgainAlert(SourceBackUpAgainAlert):
+class CometbftRPCSourceBackUpAgainAlert(SourceBackUpAgainAlert):
     def __init__(self, origin_name: str, severity: str, timestamp: float,
                  parent_id: str, origin_id: str) -> None:
-        alert_code = CosmosNodeAlertCode.TendermintRPCSourceBackUpAgainAlert
+        alert_code = CosmosNodeAlertCode.CometbftRPCSourceBackUpAgainAlert
         metric_code = (
-            GroupedCosmosNodeAlertsMetricCode.TendermintRPCSourceIsDown
+            GroupedCosmosNodeAlertsMetricCode.CometbftRPCSourceIsDown
         )
         super().__init__(
             origin_name, severity, timestamp, parent_id, origin_id,
-            'tendermint-rpc', alert_code, metric_code)
+            'cometbft-rpc', alert_code, metric_code)
 
 
 class ErrorNoSyncedCosmosRestDataSourcesAlert(ErrorNoSyncedDataSourcesAlert):
@@ -464,28 +464,28 @@ class SyncedCosmosRestDataSourcesFoundAlert(SyncedDataSourcesFoundAlert):
             alert_code, metric_code, [origin_id])
 
 
-class ErrorNoSyncedTendermintRPCDataSourcesAlert(ErrorNoSyncedDataSourcesAlert):
+class ErrorNoSyncedCometbftRPCDataSourcesAlert(ErrorNoSyncedDataSourcesAlert):
     def __init__(self, origin_name: str, message: str, severity: str,
                  timestamp: float, parent_id: str, origin_id: str) -> None:
         alert_code = (
-            CosmosNodeAlertCode.ErrorNoSyncedTendermintRPCDataSourcesAlert
+            CosmosNodeAlertCode.ErrorNoSyncedCometbftRPCDataSourcesAlert
         )
         metric_code = (
-            GroupedCosmosNodeAlertsMetricCode.NoSyncedTendermintRPCSource
+            GroupedCosmosNodeAlertsMetricCode.NoSyncedCometbftRPCSource
         )
         super().__init__(
             origin_name, message, severity, timestamp, parent_id, origin_id,
-            'tendermint-rpc', alert_code, metric_code, [origin_id])
+            'cometbft-rpc', alert_code, metric_code, [origin_id])
 
 
-class SyncedTendermintRPCDataSourcesFoundAlert(SyncedDataSourcesFoundAlert):
+class SyncedCometbftRPCDataSourcesFoundAlert(SyncedDataSourcesFoundAlert):
     def __init__(self, origin_name: str, message: str, severity: str,
                  timestamp: float, parent_id: str, origin_id: str) -> None:
         alert_code = (
-            CosmosNodeAlertCode.SyncedTendermintRPCDataSourcesFoundAlert
+            CosmosNodeAlertCode.SyncedCometbftRPCDataSourcesFoundAlert
         )
         metric_code = (
-            GroupedCosmosNodeAlertsMetricCode.NoSyncedTendermintRPCSource
+            GroupedCosmosNodeAlertsMetricCode.NoSyncedCometbftRPCSource
         )
         super().__init__(
             origin_name, message, severity, timestamp, parent_id, origin_id,
@@ -518,26 +518,26 @@ class CosmosRestServerDataObtainedAlert(DataObtainedAlert):
             alert_code, metric_code, [origin_id])
 
 
-class TendermintRPCDataCouldNotBeObtainedAlert(DataCouldNotBeObtainedAlert):
+class CometbftRPCDataCouldNotBeObtainedAlert(DataCouldNotBeObtainedAlert):
     def __init__(self, origin_name: str, message: str, severity: str,
                  timestamp: float, parent_id: str, origin_id: str) -> None:
         alert_code = (
-            CosmosNodeAlertCode.TendermintRPCDataCouldNotBeObtainedAlert
+            CosmosNodeAlertCode.CometbftRPCDataCouldNotBeObtainedAlert
         )
         metric_code = (
-            GroupedCosmosNodeAlertsMetricCode.TendermintRPCDataNotObtained
+            GroupedCosmosNodeAlertsMetricCode.CometbftRPCDataNotObtained
         )
         super().__init__(
             origin_name, message, severity, timestamp, parent_id, origin_id,
             alert_code, metric_code, [origin_id])
 
 
-class TendermintRPCDataObtainedAlert(DataObtainedAlert):
+class CometbftRPCDataObtainedAlert(DataObtainedAlert):
     def __init__(self, origin_name: str, message: str, severity: str,
                  timestamp: float, parent_id: str, origin_id: str) -> None:
-        alert_code = CosmosNodeAlertCode.TendermintRPCDataObtainedAlert
+        alert_code = CosmosNodeAlertCode.CometbftRPCDataObtainedAlert
         metric_code = (
-            GroupedCosmosNodeAlertsMetricCode.TendermintRPCDataNotObtained
+            GroupedCosmosNodeAlertsMetricCode.CometbftRPCDataNotObtained
         )
         super().__init__(
             origin_name, message, severity, timestamp, parent_id, origin_id,

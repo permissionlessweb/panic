@@ -239,7 +239,7 @@ class NodeMonitorsManager(MonitorsManager):
                 sources_enabled = [
                     node_config.monitor_cosmos_rest,
                     node_config.monitor_prometheus,
-                    node_config.monitor_tendermint_rpc
+                    node_config.monitor_cometbft_rpc
                 ]
                 if not node_config.monitor_node or not any(sources_enabled):
                     continue
@@ -269,7 +269,7 @@ class NodeMonitorsManager(MonitorsManager):
                 sources_enabled = [
                     node_config.monitor_cosmos_rest,
                     node_config.monitor_prometheus,
-                    node_config.monitor_tendermint_rpc
+                    node_config.monitor_cometbft_rpc
                 ]
                 if not node_config.monitor_node or not any(sources_enabled):
                     del self.config_process_dict[config_id]
