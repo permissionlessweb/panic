@@ -4,8 +4,7 @@
 
 ## 1.4.0 
 
-- Update cosmos-rpc api endpoints to support cosmos-sdk@v0.50.* & cometbft@v0.38.12
-- Replace tendermint namespaced objects with cometbft
+- Updated Cosmos cometbft rpc query definitions
 
 ## 1.3.1
 
