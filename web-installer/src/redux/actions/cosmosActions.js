@@ -86,8 +86,8 @@ export function addNodeCosmos(payload) {
       use_as_data_source: payload.use_as_data_source,
       monitor_network: payload.monitor_network,
       operator_address: payload.operator_address,
-      monitor_tendermint_rpc: payload.monitor_tendermint_rpc,
-      tendermint_rpc_url: payload.tendermint_rpc_url,
+      monitor_cometbft_rpc: payload.monitor_cometbft_rpc,
+      cometbft_rpc_url: payload.cometbft_rpc_url,
     },
   };
 }

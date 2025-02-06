@@ -1080,7 +1080,7 @@ app.post('/server/cosmos/rest', verify, async (req, res) => {
     });
 });
 
-app.post('/server/cosmos/tendermint', verify, async (req, res) => {
+app.post('/server/cosmos/cometbft-rpc', verify, async (req, res) => {
   console.log('Received POST request for %s', req.url);
   const { httpUrl } = req.body;
 

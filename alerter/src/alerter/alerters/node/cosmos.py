@@ -29,7 +29,7 @@ from src.utils.data import transformed_data_processing_helper
 from src.utils.exceptions import (
     MessageWasNotDeliveredException, InvalidUrlException,
     MetricNotFoundException, NoSyncedDataSourceWasAccessibleException,
-    CosmosRestServerDataCouldNotBeObtained, TendermintRPCDataCouldNotBeObtained,
+    CosmosRestServerDataCouldNotBeObtained, CometbftRPCDataCouldNotBeObtained,
     NodeIsDownException)
 from src.utils.types import str_to_bool
 
@@ -403,15 +403,15 @@ class CosmosNodeAlerter(Alerter):
                 "again.".format(node_name), err_code
             )
 
-    def _process_tendermint_rpc_result(self, tendermint_data: Dict,
+    def _process_cometbft_rpc_result(self, cometbft_data: Dict,
                                        data_for_alerting: List) -> None:
-        meta_data = tendermint_data['meta_data']
+        meta_data = cometbft_data['meta_data']
         is_validator = meta_data['is_validator']
         parent_id = meta_data['node_parent_id']
         node_id = meta_data['node_id']
         node_name = meta_data['node_name']
         last_monitored = meta_data['last_monitored']
-        data = tendermint_data['data']
+        data = cometbft_data['data']
 
         # Assert that the alerts_config has been received for the chain.
         chain_name = self.alerts_configs_factory.get_chain_name(
@@ -424,28 +424,28 @@ class CosmosNodeAlerter(Alerter):
             # Check if some errors have been resolved
             self.alerting_factory.classify_error_alert(
                 InvalidUrlException.code,
-                cosmos_alerts.TendermintRPCInvalidUrlAlert,
-                cosmos_alerts.TendermintRPCValidUrlAlert, data_for_alerting,
+                cosmos_alerts.CometbftRPCInvalidUrlAlert,
+                cosmos_alerts.CometbftRPCValidUrlAlert, data_for_alerting,
                 parent_id, node_id, node_name, last_monitored,
-                MetricCode.TendermintRPCInvalidUrl.value, "",
-                "Tendermint-RPC url is now valid!", None
+                MetricCode.CometbftRPCInvalidUrl.value, "",
+                "Cometbft-RPC url is now valid!", None
             )
             self.alerting_factory.classify_error_alert(
                 NoSyncedDataSourceWasAccessibleException.code,
-                cosmos_alerts.ErrorNoSyncedTendermintRPCDataSourcesAlert,
-                cosmos_alerts.SyncedTendermintRPCDataSourcesFoundAlert,
+                cosmos_alerts.ErrorNoSyncedCometbftRPCDataSourcesAlert,
+                cosmos_alerts.SyncedCometbftRPCDataSourcesFoundAlert,
                 data_for_alerting, parent_id, node_id, node_name,
-                last_monitored, MetricCode.NoSyncedTendermintRPCSource.value,
-                "", "The monitor for {} found a Tendermint-RPC synced data "
+                last_monitored, MetricCode.NoSyncedCometbftRPCSource.value,
+                "", "The monitor for {} found a Cometbft-RPC synced data "
                     "source again".format(node_name), None
             )
             self.alerting_factory.classify_error_alert(
-                TendermintRPCDataCouldNotBeObtained.code,
-                cosmos_alerts.TendermintRPCDataCouldNotBeObtainedAlert,
-                cosmos_alerts.TendermintRPCDataObtainedAlert, data_for_alerting,
+                CometbftRPCDataCouldNotBeObtained.code,
+                cosmos_alerts.CometbftRPCDataCouldNotBeObtainedAlert,
+                cosmos_alerts.CometbftRPCDataObtainedAlert, data_for_alerting,
                 parent_id, node_id, node_name, last_monitored,
-                MetricCode.TendermintRPCDataNotObtained.value, "",
-                "The monitor for {} successfully retrieved Tendermint-RPC data "
+                MetricCode.CometbftRPCDataNotObtained.value, "",
+                "The monitor for {} successfully retrieved Cometbft-RPC data "
                 "again.".format(node_name), None
             )
 
@@ -477,8 +477,8 @@ class CosmosNodeAlerter(Alerter):
                         [node_name, Severity.INFO.value, last_monitored,
                          parent_id, node_id]
                     )
-            ## Only alert if the node is running mev_tendermint
-            if str_to_bool(is_peered_with_sentinel_configs['enabled']) and meta_data['is_mev_tendermint_node']:
+            ## Only alert if the node is running mev_cometbft
+            if str_to_bool(is_peered_with_sentinel_configs['enabled']) and meta_data['is_mev_cometbft_node']:
                 current = data['is_peered_with_sentinel']['current']
                 if current is not None:
                     classification_fn(
@@ -521,16 +521,16 @@ class CosmosNodeAlerter(Alerter):
                     last_monitored
                 )
 
-    def _process_tendermint_rpc_error(self, tendermint_data: Dict,
+    def _process_cometbft_rpc_error(self, cometbft_data: Dict,
                                       data_for_alerting: List) -> None:
-        meta_data = tendermint_data['meta_data']
+        meta_data = cometbft_data['meta_data']
         is_validator = meta_data['is_validator']
         parent_id = meta_data['node_parent_id']
         node_id = meta_data['node_id']
         node_name = meta_data['node_name']
         time = meta_data['time']
-        err_message = tendermint_data['message']
-        err_code = tendermint_data['code']
+        err_message = cometbft_data['message']
+        err_code = cometbft_data['code']
 
         # Assert that the alerts_config has been received for the chain.
         chain_name = self.alerts_configs_factory.get_chain_name(
@@ -544,28 +544,28 @@ class CosmosNodeAlerter(Alerter):
             # resolved.
             self.alerting_factory.classify_error_alert(
                 InvalidUrlException.code,
-                cosmos_alerts.TendermintRPCInvalidUrlAlert,
-                cosmos_alerts.TendermintRPCValidUrlAlert, data_for_alerting,
+                cosmos_alerts.CometbftRPCInvalidUrlAlert,
+                cosmos_alerts.CometbftRPCValidUrlAlert, data_for_alerting,
                 parent_id, node_id, node_name, time,
-                MetricCode.TendermintRPCInvalidUrl.value, err_message,
-                "Tendermint-RPC url is now valid!", err_code
+                MetricCode.CometbftRPCInvalidUrl.value, err_message,
+                "Cometbft-RPC url is now valid!", err_code
             )
             self.alerting_factory.classify_error_alert(
                 NoSyncedDataSourceWasAccessibleException.code,
-                cosmos_alerts.ErrorNoSyncedTendermintRPCDataSourcesAlert,
-                cosmos_alerts.SyncedTendermintRPCDataSourcesFoundAlert,
+                cosmos_alerts.ErrorNoSyncedCometbftRPCDataSourcesAlert,
+                cosmos_alerts.SyncedCometbftRPCDataSourcesFoundAlert,
                 data_for_alerting, parent_id, node_id, node_name, time,
-                MetricCode.NoSyncedTendermintRPCSource.value, err_message,
-                "The monitor for {} found a Tendermint-RPC synced data source "
+                MetricCode.NoSyncedCometbftRPCSource.value, err_message,
+                "The monitor for {} found a Cometbft-RPC synced data source "
                 "again".format(node_name), err_code
             )
             self.alerting_factory.classify_error_alert(
-                TendermintRPCDataCouldNotBeObtained.code,
-                cosmos_alerts.TendermintRPCDataCouldNotBeObtainedAlert,
-                cosmos_alerts.TendermintRPCDataObtainedAlert,
+                CometbftRPCDataCouldNotBeObtained.code,
+                cosmos_alerts.CometbftRPCDataCouldNotBeObtainedAlert,
+                cosmos_alerts.CometbftRPCDataObtainedAlert,
                 data_for_alerting, parent_id, node_id, node_name, time,
-                MetricCode.TendermintRPCDataNotObtained.value, err_message,
-                "The monitor for {} successfully retrieved Tendermint-RPC data "
+                MetricCode.CometbftRPCDataNotObtained.value, err_message,
+                "The monitor for {} successfully retrieved Cometbft-RPC data "
                 "again.".format(node_name), err_code
             )
 
@@ -738,36 +738,36 @@ class CosmosNodeAlerter(Alerter):
                     monitoring_timestamp
                 )
 
-            tendermint_rpc_down_configs = (
-                configs.cannot_access_tendermint_rpc_validator if is_validator
-                else configs.cannot_access_tendermint_rpc_node
+            cometbft_rpc_down_configs = (
+                configs.cannot_access_cometbft_rpc_validator if is_validator
+                else configs.cannot_access_cometbft_rpc_node
             )
-            if (str_to_bool(tendermint_rpc_down_configs['enabled'])
-                    and trans_data['tendermint_rpc']
+            if (str_to_bool(cometbft_rpc_down_configs['enabled'])
+                    and trans_data['cometbft_rpc']
                     and not all_sources_down):
                 current_went_down = (
-                    trans_data['tendermint_rpc']['error']['data'][
+                    trans_data['cometbft_rpc']['error']['data'][
                         'went_down_at']['current']
-                    if 'tendermint_rpc' in down_sources else None
+                    if 'cometbft_rpc' in down_sources else None
                 )
                 response_index_key = (
-                    'result' if 'result' in trans_data['tendermint_rpc']
+                    'result' if 'result' in trans_data['cometbft_rpc']
                     else 'error'
                 )
                 monitoring_timestamp = (
-                    trans_data['tendermint_rpc']['result']['meta_data'][
+                    trans_data['cometbft_rpc']['result']['meta_data'][
                         'last_monitored']
                     if response_index_key == 'result'
-                    else trans_data['tendermint_rpc']['error']['meta_data'][
+                    else trans_data['cometbft_rpc']['error']['meta_data'][
                         'time']
                 )
                 self.alerting_factory.classify_downtime_alert(
-                    current_went_down, tendermint_rpc_down_configs,
-                    cosmos_alerts.TendermintRPCSourceIsDownAlert,
-                    cosmos_alerts.TendermintRPCSourceStillDownAlert,
-                    cosmos_alerts.TendermintRPCSourceBackUpAgainAlert,
+                    current_went_down, cometbft_rpc_down_configs,
+                    cosmos_alerts.CometbftRPCSourceIsDownAlert,
+                    cosmos_alerts.CometbftRPCSourceStillDownAlert,
+                    cosmos_alerts.CometbftRPCSourceBackUpAgainAlert,
                     data_for_alerting, parent_id, origin_id,
-                    MetricCode.TendermintRPCSourceIsDown.value, origin_name,
+                    MetricCode.CometbftRPCSourceIsDown.value, origin_name,
                     monitoring_timestamp
                 )
 
@@ -789,9 +789,9 @@ class CosmosNodeAlerter(Alerter):
                     'result': self._process_cosmos_rest_result,
                     'error': self._process_cosmos_rest_error,
                 },
-                'tendermint_rpc': {
-                    'result': self._process_tendermint_rpc_result,
-                    'error': self._process_tendermint_rpc_error,
+                'cometbft_rpc': {
+                    'result': self._process_cometbft_rpc_result,
+                    'error': self._process_cometbft_rpc_error,
                 }
             }
             self._process_downtime(data_received, data_for_alerting)

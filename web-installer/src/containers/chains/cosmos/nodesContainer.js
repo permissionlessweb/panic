@@ -27,8 +27,8 @@ const Form = withFormik({
     is_archive_node: true,
     use_as_data_source: true,
     operator_address: '',
-    monitor_tendermint_rpc: true,
-    tendermint_rpc_url: '',
+    monitor_cometbft_rpc: true,
+    cometbft_rpc_url: '',
   }),
   toggleDirtyForm: (tog, { props }) => {
     const { toggleDirtyForm } = props;
@@ -51,8 +51,8 @@ const Form = withFormik({
       is_archive_node: values.is_archive_node,
       use_as_data_source: values.use_as_data_source,
       operator_address: values.operator_address,
-      monitor_tendermint_rpc: values.monitor_tendermint_rpc,
-      tendermint_rpc_url: values.tendermint_rpc_url,
+      monitor_cometbft_rpc: values.monitor_cometbft_rpc,
+      cometbft_rpc_url: values.cometbft_rpc_url,
       monitor_network: true,
     };
     saveNodeDetails(payload);

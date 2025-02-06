@@ -52,10 +52,10 @@ _key_cosmos_node_slashed = 'CosmosNode6'
 _key_cosmos_node_missed_blocks = 'CosmosNode7'
 _key_cosmos_node_went_down_at_prometheus = 'CosmosNode8'
 _key_cosmos_node_went_down_at_cosmos_rest = 'CosmosNode9'
-_key_cosmos_node_went_down_at_tendermint_rpc = 'CosmosNode10'
+_key_cosmos_node_went_down_at_cometbft_rpc = 'CosmosNode10'
 _key_cosmos_node_last_monitored_prometheus = 'CosmosNode11'
 _key_cosmos_node_last_monitored_cosmos_rest = 'CosmosNode12'
-_key_cosmos_node_last_monitored_tendermint_rpc = 'CosmosNode13'
+_key_cosmos_node_last_monitored_cometbft_rpc = 'CosmosNode13'
 _key_cosmos_node_is_peered = 'CosmosNode14'
 
 # CosmosNetworkX_<cosmos_network_id>
@@ -166,14 +166,14 @@ _key_alert_cosmos_node_change_in_height = 'alert_cosmos_node7'
 _key_alert_cosmos_node_height_difference = 'alert_cosmos_node8'
 _key_alert_cosmos_node_prometheus_url_invalid = 'alert_cosmos_node9'
 _key_alert_cosmos_node_cosmos_rest_url_invalid = 'alert_cosmos_node10'
-_key_alert_cosmos_node_tendermint_rpc_url_invalid = 'alert_cosmos_node11'
+_key_alert_cosmos_node_cometbft_rpc_url_invalid = 'alert_cosmos_node11'
 _key_alert_cosmos_node_prometheus_is_down = 'alert_cosmos_node12'
 _key_alert_cosmos_node_cosmos_rest_is_down = 'alert_cosmos_node13'
-_key_alert_cosmos_node_tendermint_rpc_is_down = 'alert_cosmos_node14'
+_key_alert_cosmos_node_cometbft_rpc_is_down = 'alert_cosmos_node14'
 _key_alert_cosmos_node_no_synced_cosmos_rest_source = 'alert_cosmos_node15'
-_key_alert_cosmos_node_no_synced_tendermint_rpc_source = 'alert_cosmos_node16'
+_key_alert_cosmos_node_no_synced_cometbft_rpc_source = 'alert_cosmos_node16'
 _key_alert_cosmos_node_cosmos_rest_data_not_obtained = 'alert_cosmos_node17'
-_key_alert_cosmos_node_tendermint_rpc_data_not_obtained = 'alert_cosmos_node18'
+_key_alert_cosmos_node_cometbft_rpc_data_not_obtained = 'alert_cosmos_node18'
 _key_alert_cosmos_node_metric_not_found = 'alert_cosmos_node19'
 
 # alert_cosmos_networkX
@@ -439,9 +439,9 @@ class Keys:
             _key_cosmos_node_went_down_at_cosmos_rest) + cosmos_node_id
 
     @staticmethod
-    def get_cosmos_node_went_down_at_tendermint_rpc(cosmos_node_id: str) -> str:
+    def get_cosmos_node_went_down_at_cometbft_rpc(cosmos_node_id: str) -> str:
         return Keys._as_prefix(
-            _key_cosmos_node_went_down_at_tendermint_rpc) + cosmos_node_id
+            _key_cosmos_node_went_down_at_cometbft_rpc) + cosmos_node_id
 
     @staticmethod
     def get_cosmos_node_last_monitored_prometheus(cosmos_node_id: str) -> str:
@@ -454,10 +454,10 @@ class Keys:
             _key_cosmos_node_last_monitored_cosmos_rest) + cosmos_node_id
 
     @staticmethod
-    def get_cosmos_node_last_monitored_tendermint_rpc(
+    def get_cosmos_node_last_monitored_cometbft_rpc(
             cosmos_node_id: str) -> str:
         return Keys._as_prefix(
-            _key_cosmos_node_last_monitored_tendermint_rpc) + cosmos_node_id
+            _key_cosmos_node_last_monitored_cometbft_rpc) + cosmos_node_id
 
     @staticmethod
     def get_cosmos_network_proposals(parent_id: str) -> str:
@@ -863,9 +863,9 @@ class Keys:
             _key_alert_cosmos_node_cosmos_rest_url_invalid) + origin_id
 
     @staticmethod
-    def get_alert_cosmos_node_tendermint_rpc_url_invalid(origin_id: str) -> str:
+    def get_alert_cosmos_node_cometbft_rpc_url_invalid(origin_id: str) -> str:
         return Keys._as_prefix(
-            _key_alert_cosmos_node_tendermint_rpc_url_invalid
+            _key_alert_cosmos_node_cometbft_rpc_url_invalid
         ) + origin_id
 
     @staticmethod
@@ -879,9 +879,9 @@ class Keys:
             _key_alert_cosmos_node_cosmos_rest_is_down) + origin_id
 
     @staticmethod
-    def get_alert_cosmos_node_tendermint_rpc_is_down(origin_id: str) -> str:
+    def get_alert_cosmos_node_cometbft_rpc_is_down(origin_id: str) -> str:
         return Keys._as_prefix(
-            _key_alert_cosmos_node_tendermint_rpc_is_down) + origin_id
+            _key_alert_cosmos_node_cometbft_rpc_is_down) + origin_id
 
     @staticmethod
     def get_alert_cosmos_node_no_synced_cosmos_rest_source(
@@ -890,10 +890,10 @@ class Keys:
             _key_alert_cosmos_node_no_synced_cosmos_rest_source) + origin_id
 
     @staticmethod
-    def get_alert_cosmos_node_no_synced_tendermint_rpc_source(
+    def get_alert_cosmos_node_no_synced_cometbft_rpc_source(
             origin_id: str) -> str:
         return Keys._as_prefix(
-            _key_alert_cosmos_node_no_synced_tendermint_rpc_source) + origin_id
+            _key_alert_cosmos_node_no_synced_cometbft_rpc_source) + origin_id
 
     @staticmethod
     def get_alert_cosmos_node_cosmos_rest_data_not_obtained(
@@ -902,10 +902,10 @@ class Keys:
             _key_alert_cosmos_node_cosmos_rest_data_not_obtained) + origin_id
 
     @staticmethod
-    def get_alert_cosmos_node_tendermint_rpc_data_not_obtained(
+    def get_alert_cosmos_node_cometbft_rpc_data_not_obtained(
             origin_id: str) -> str:
         return Keys._as_prefix(
-            _key_alert_cosmos_node_tendermint_rpc_data_not_obtained) + origin_id
+            _key_alert_cosmos_node_cometbft_rpc_data_not_obtained) + origin_id
 
     @staticmethod
     def get_alert_cosmos_node_metric_not_found(origin_id: str) -> str:

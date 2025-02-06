@@ -17,8 +17,8 @@ function pingPrometheus(prometheusUrl, metric) {
     { prometheusUrl, metric });
 }
 
-function pingTendermintRPC(httpUrl) {
-  return sendData('/server/cosmos/tendermint', {},
+function pingCometbftRPC(httpUrl) {
+  return sendData('/server/cosmos/cometbft-rpc', {},
     { httpUrl });
 }
 
@@ -112,5 +112,5 @@ export {
   authenticate, sendTestPagerDuty, sendTestOpsGenie, refreshAccessToken,
   sendConfig, saveAccount, deleteAccount, getConfigPaths, getConfig,
   loadAccounts, deleteConfigs, pingDockerHub, pingPrometheus, pingEthRPC,
-  pingCosmosRestUrl, pingTendermintRPC, pingSubstrate,
+  pingCosmosRestUrl, pingCometbftRPC, pingSubstrate,
 };

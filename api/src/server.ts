@@ -1249,15 +1249,15 @@ app.post('/server/cosmos/rest',
         });
     });
 
-app.post('/server/cosmos/tendermint-rpc',
+app.post('/server/cosmos/cometbft-rpc',
     async (req: express.Request, res: express.Response) => {
         console.log('Received POST request for %s %s', req.url, req.body);
-        const tendermintRpcUrl = req.body['url'];
+        const cometbftRpcUrl = req.body['url'];
 
         // Check if some required keys are missing in the body object, if yes
         // notify the client.
         const missingKeysList: string[] = missingValues({
-            url: tendermintRpcUrl
+            url: cometbftRpcUrl
         });
         if (missingKeysList.length !== 0) {
             const err = new MissingKeysInBody(...missingKeysList);
@@ -1265,7 +1265,7 @@ app.post('/server/cosmos/tendermint-rpc',
             return;
         }
 
-        const url = `${tendermintRpcUrl}/abci_info?`;
+        const url = `${cometbftRpcUrl}/abci_info?`;
 
         axios.get(url, {timeout: 3000}).then((response) => {
             if ('jsonrpc' in response.data) {

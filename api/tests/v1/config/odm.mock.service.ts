@@ -197,8 +197,8 @@ export const config = {
             "status": true,
             "created": "2022-05-02T22:02:46.000Z",
             "modified": null,
-            "name": "Tendermint",
-            "value": "tendermint/tendermint/",
+            "name": "Cometbft",
+            "value": "cometbft/cometbft/",
             "namespace": null,
             "type": repositoryType,
             "monitor": true
@@ -208,9 +208,9 @@ export const config = {
             "status": true,
             "created": "2022-05-02T22:02:46.000Z",
             "modified": null,
-            "name": "tendermint",
+            "name": "cometbft",
             "value": "tendermit",
-            "namespace": "tendermint",
+            "namespace": "cometbft",
             "type": {
                 "_id": "6269d568d509ee91767dbfd6",
                 "status": true,

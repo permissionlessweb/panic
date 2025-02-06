@@ -545,7 +545,7 @@ SaveConfig.propTypes = {
       id: PropTypes.string,
       parent_id: PropTypes.string,
       name: PropTypes.string,
-      tendermint_rpc_url: PropTypes.string,
+      cometbft_rpc_url: PropTypes.string,
       cosmos_rpc_url: PropTypes.string,
       prometheus_url: PropTypes.string,
       exporter_url: PropTypes.string,

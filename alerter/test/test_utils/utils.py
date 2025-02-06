@@ -278,8 +278,8 @@ def save_cosmos_node_to_redis(redis: RedisApi,
             str(cosmos_node.went_down_at_prometheus),
         Keys.get_cosmos_node_went_down_at_cosmos_rest(cosmos_node_id):
             str(cosmos_node.went_down_at_cosmos_rest),
-        Keys.get_cosmos_node_went_down_at_tendermint_rpc(cosmos_node_id):
-            str(cosmos_node.went_down_at_tendermint_rpc),
+        Keys.get_cosmos_node_went_down_at_cometbft_rpc(cosmos_node_id):
+            str(cosmos_node.went_down_at_cometbft_rpc),
         Keys.get_cosmos_node_current_height(cosmos_node_id):
             str(cosmos_node.current_height),
         Keys.get_cosmos_node_voting_power(cosmos_node_id):
@@ -295,8 +295,8 @@ def save_cosmos_node_to_redis(redis: RedisApi,
             json.dumps(cosmos_node.missed_blocks),
         Keys.get_cosmos_node_last_monitored_prometheus(cosmos_node_id):
             str(cosmos_node.last_monitored_prometheus),
-        Keys.get_cosmos_node_last_monitored_tendermint_rpc(cosmos_node_id):
-            str(cosmos_node.last_monitored_tendermint_rpc),
+        Keys.get_cosmos_node_last_monitored_cometbft_rpc(cosmos_node_id):
+            str(cosmos_node.last_monitored_cometbft_rpc),
         Keys.get_cosmos_node_last_monitored_cosmos_rest(cosmos_node_id):
             str(cosmos_node.last_monitored_cosmos_rest),
     })

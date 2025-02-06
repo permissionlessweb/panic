@@ -232,7 +232,7 @@ class TestSubstrateNodeMonitor(unittest.TestCase):
 
     def test_last_height_monitored_websocket_returns_lh_monitored_websocket(
             self) -> None:
-        # Test that on init, last_height_monitored_tendermint is None
+        # Test that on init, last_height_monitored_cometbft is None
         self.assertIsNone(self.test_monitor.last_height_monitored_websocket)
 
         # Test that the property returns the correct value

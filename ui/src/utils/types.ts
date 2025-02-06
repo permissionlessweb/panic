@@ -4,7 +4,7 @@
 import {PingStatus} from "./constants";
 
 export type ServiceNames = (
-    'node-exporter' | 'prometheus' | 'cosmos-rest' |'tendermint-rpc' | 'substrate-websocket' |
+    'node-exporter' | 'prometheus' | 'cosmos-rest' |'cometbft-rpc' | 'substrate-websocket' |
     'ethereum-rpc'| 'opsgenie' | 'telegram'| 'slack' | 'pagerduty' | 'twilio' | 'email' | 'github' | 'dockerhub'
     );
 

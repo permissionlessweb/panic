@@ -94,9 +94,9 @@ def parse_cosmos_node_config(node_config: Dict) -> CosmosNodeConfig:
     monitor_cosmos_rest = str_to_bool(
         node_config['monitor_cosmos_rest'])
     cosmos_rest_url = node_config['cosmos_rest_url']
-    monitor_tendermint_rpc = str_to_bool(
-        node_config['monitor_tendermint_rpc'])
-    tendermint_rpc_url = node_config['tendermint_rpc_url']
+    monitor_cometbft_rpc = str_to_bool(
+        node_config['monitor_cometbft_rpc'])
+    cometbft_rpc_url = node_config['cometbft_rpc_url']
     is_validator = str_to_bool(node_config['is_validator'])
     use_as_data_source = str_to_bool(node_config['use_as_data_source'])
     is_archive_node = str_to_bool(node_config['is_archive_node'])
@@ -104,7 +104,7 @@ def parse_cosmos_node_config(node_config: Dict) -> CosmosNodeConfig:
     return CosmosNodeConfig(
         node_id, parent_id, node_name, monitor_node, monitor_prometheus,
         prometheus_url, monitor_cosmos_rest, cosmos_rest_url,
-        monitor_tendermint_rpc, tendermint_rpc_url, is_validator,
+        monitor_cometbft_rpc, cometbft_rpc_url, is_validator,
         is_archive_node, use_as_data_source, operator_address)
 
 

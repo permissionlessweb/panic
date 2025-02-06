@@ -80,8 +80,8 @@ class TestCosmosAlertersManager(unittest.TestCase):
             'cannot_access_prometheus_node',
             'cannot_access_cosmos_rest_validator',
             'cannot_access_cosmos_rest_node',
-            'cannot_access_tendermint_rpc_validator',
-            'cannot_access_tendermint_rpc_node', 'missed_blocks', 'slashed',
+            'cannot_access_cometbft_rpc_validator',
+            'cannot_access_cometbft_rpc_node', 'missed_blocks', 'slashed',
             'node_is_syncing', 'validator_is_syncing',
             'validator_not_active_in_session', 'validator_is_jailed',
             'new_proposal', 'proposal_concluded',
@@ -122,11 +122,11 @@ class TestCosmosAlertersManager(unittest.TestCase):
                     'cannot_access_cosmos_rest_validator'],
                 cannot_access_cosmos_rest_node=filtered_received_configs[
                     'cannot_access_cosmos_rest_node'],
-                cannot_access_tendermint_rpc_validator=
+                cannot_access_cometbft_rpc_validator=
                 filtered_received_configs[
-                    'cannot_access_tendermint_rpc_validator'],
-                cannot_access_tendermint_rpc_node=filtered_received_configs[
-                    'cannot_access_tendermint_rpc_node'],
+                    'cannot_access_cometbft_rpc_validator'],
+                cannot_access_cometbft_rpc_node=filtered_received_configs[
+                    'cannot_access_cometbft_rpc_node'],
                 missed_blocks=filtered_received_configs['missed_blocks'],
                 slashed=filtered_received_configs['slashed'],
                 node_is_syncing=filtered_received_configs['node_is_syncing'],

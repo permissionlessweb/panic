@@ -15,7 +15,7 @@ from requests.exceptions import (ConnectionError as ReqConnectionError,
 from urllib3.exceptions import ProtocolError
 
 from src.api_wrappers.cosmos import (
-    CosmosRestServerApiWrapper, TendermintRpcApiWrapper)
+    CosmosRestServerApiWrapper, CometbftRpcApiWrapper)
 from src.configs.nodes.cosmos import CosmosNodeConfig
 from src.message_broker.rabbitmq import RabbitMQApi
 from src.monitors.cosmos import CosmosMonitor
@@ -26,7 +26,7 @@ from src.utils.constants.rabbitmq import (
 from src.utils.exceptions import (
     ComponentNotGivenEnoughDataSourcesException, PANICException,
     CosmosSDKVersionIncompatibleException, CosmosRestServerApiCallException,
-    TendermintRPCCallException, TendermintRPCIncompatibleException,
+    CometbftRPCCallException, CometbftRPCIncompatibleException,
     NodeIsDownException, InvalidUrlException, DataReadingException,
     CannotConnectWithDataSourceException, IncorrectJSONRetrievedException)
 from test.test_utils.utils import (
@@ -106,14 +106,14 @@ class TestCosmosMonitor(unittest.TestCase):
                 "total": 0
             }
         }
-        self.tendermint_ret_1 = {
+        self.cometbft_ret_1 = {
             'result': {
                 'data': 'val_1',
                 'count': 30,
                 'total': 60,
             }
         }
-        self.tendermint_ret_2 = {
+        self.cometbft_ret_2 = {
             'result': {
                 'data': 'val_2',
                 'count': 30,
@@ -170,9 +170,9 @@ class TestCosmosMonitor(unittest.TestCase):
         test_wrapper = CosmosRestServerApiWrapper(self.dummy_logger)
         self.assertEqual(test_wrapper, self.test_monitor.cosmos_rest_server_api)
 
-    def test_tendermint_rpc_api_returns_tendermint_rpc_api(self) -> None:
-        test_wrapper = TendermintRpcApiWrapper(self.dummy_logger)
-        self.assertEqual(test_wrapper, self.test_monitor.tendermint_rpc_api)
+    def test_cometbft_rpc_api_returns_cometbft_rpc_api(self) -> None:
+        test_wrapper = CometbftRpcApiWrapper(self.dummy_logger)
+        self.assertEqual(test_wrapper, self.test_monitor.cometbft_rpc_api)
 
     def test_last_rest_retrieval_version_returns_last_rest_retrieval_version(
             self) -> None:
@@ -377,22 +377,22 @@ class TestCosmosMonitor(unittest.TestCase):
             self.data_sources, self.sdk_version_0_39_2)
         self.assertIsNone(actual)
 
-    @mock.patch.object(TendermintRpcApiWrapper, 'execute_with_checks')
-    def test_select_cosmos_tendermint_node_selects_first_reachable_synced_node(
+    @mock.patch.object(CometbftRpcApiWrapper, 'execute_with_checks')
+    def test_select_cosmos_cometbft_node_selects_first_reachable_synced_node(
             self, mock_execute_with_checks) -> None:
         """
         In this test we will check that if all nodes are synced and connected,
-        then select_cosmos_tendermint_node will select the first node it finds
+        then select_cosmos_cometbft_node will select the first node it finds
         """
         mock_execute_with_checks.return_value = {
             "result": {'sync_info': {'catching_up': False}}
         }
-        actual = self.test_monitor._select_cosmos_tendermint_node(
+        actual = self.test_monitor._select_cosmos_cometbft_node(
             self.data_sources)
         self.assertEqual(self.data_sources[0], actual)
 
-    @mock.patch.object(TendermintRpcApiWrapper, 'execute_with_checks')
-    def test_select_cosmos_tendermint_node_does_not_select_syncing_nodes(
+    @mock.patch.object(CometbftRpcApiWrapper, 'execute_with_checks')
+    def test_select_cosmos_cometbft_node_does_not_select_syncing_nodes(
             self, mock_execute_with_checks) -> None:
         """
         In this test we will set the first two nodes to be syncing, and the
@@ -404,7 +404,7 @@ class TestCosmosMonitor(unittest.TestCase):
             {"result": {'sync_info': {'catching_up': True}}},
             {"result": {'sync_info': {'catching_up': False}}}
         ]
-        actual = self.test_monitor._select_cosmos_tendermint_node(
+        actual = self.test_monitor._select_cosmos_cometbft_node(
             self.data_sources)
         self.assertEqual(self.data_sources[2], actual)
 
@@ -417,12 +417,12 @@ class TestCosmosMonitor(unittest.TestCase):
         (IncompleteRead('test'),),
         (ChunkedEncodingError('test'),),
         (ProtocolError('test'),),
-        (TendermintRPCCallException('test_api_call', 'error_msg'),),
-        (TendermintRPCIncompatibleException('test_node'),),
+        (CometbftRPCCallException('test_api_call', 'error_msg'),),
+        (CometbftRPCIncompatibleException('test_node'),),
         (KeyError('test'),),
     ])
-    @mock.patch.object(TendermintRpcApiWrapper, 'execute_with_checks')
-    def test_select_cosmos_tendermint_node_ignores_nodes_raising_expected_err(
+    @mock.patch.object(CometbftRpcApiWrapper, 'execute_with_checks')
+    def test_select_cosmos_cometbft_node_ignores_nodes_raising_expected_err(
             self, exception_instance, mock_execute_with_checks) -> None:
         """
         In this test we will set the first two nodes to return one of the
@@ -437,7 +437,7 @@ class TestCosmosMonitor(unittest.TestCase):
             exception_instance,
             {"result": {'sync_info': {'catching_up': False}}}
         ]
-        actual = self.test_monitor._select_cosmos_tendermint_node(
+        actual = self.test_monitor._select_cosmos_cometbft_node(
             self.data_sources)
         self.assertEqual(self.data_sources[2], actual)
 
@@ -450,16 +450,16 @@ class TestCosmosMonitor(unittest.TestCase):
         (IncompleteRead('test'),),
         (ChunkedEncodingError('test'),),
         (ProtocolError('test'),),
-        (TendermintRPCCallException('test_api_call', 'error_msg'),),
-        (TendermintRPCIncompatibleException('test_node'),),
+        (CometbftRPCCallException('test_api_call', 'error_msg'),),
+        (CometbftRPCIncompatibleException('test_node'),),
         (KeyError('test'),),
     ])
-    @mock.patch.object(TendermintRpcApiWrapper, 'execute_with_checks')
-    def test_select_cosmos_tendermint_node_returns_None_if_no_node_selected(
+    @mock.patch.object(CometbftRpcApiWrapper, 'execute_with_checks')
+    def test_select_cosmos_cometbft_node_returns_None_if_no_node_selected(
             self, exception_instance, mock_execute_with_checks) -> None:
         """
         In this test we will check that if neither node is online, synced, and
-        does not raise errors, then select_cosmos_tendermint_node returns None.
+        does not raise errors, then select_cosmos_cometbft_node returns None.
         Note, we will set the first node to be offline, the second node to raise
         an error and the third to be syncing .
         """
@@ -468,7 +468,7 @@ class TestCosmosMonitor(unittest.TestCase):
             exception_instance,
             {"result": {'sync_info': {'catching_up': True}}}
         ]
-        actual = self.test_monitor._select_cosmos_tendermint_node(
+        actual = self.test_monitor._select_cosmos_cometbft_node(
             self.data_sources)
         self.assertIsNone(actual)
 
@@ -559,11 +559,11 @@ class TestCosmosMonitor(unittest.TestCase):
         (True,),
         (False,),
     ])
-    def test_execute_cosmos_tendermint_ret_with_exceptions_ret_fn_ret_if_no_err(
+    def test_execute_cosmos_cometbft_ret_with_exceptions_ret_fn_ret_if_no_err(
             self, direct_retrieval) -> None:
         """
         In this test we will be checking that the
-        _execute_cosmos_tendermint_retrieval_with_exceptions function returns
+        _execute_cosmos_cometbft_retrieval_with_exceptions function returns
         the callback return if no error is raised. Note that we will be checking
         this for both when we perform a direct data retrieval and for when we
         perform an indirect data retrieval.
@@ -573,9 +573,9 @@ class TestCosmosMonitor(unittest.TestCase):
             return self.test_data_dict
 
         source_name = self.data_sources[0].node_name
-        source_url = self.data_sources[0].tendermint_rpc_url
+        source_url = self.data_sources[0].cometbft_rpc_url
         actual_ret = self.test_monitor. \
-            _execute_cosmos_tendermint_retrieval_with_exceptions(
+            _execute_cosmos_cometbft_retrieval_with_exceptions(
             test_fn, source_name, source_url, direct_retrieval
         )
         self.assertEqual(self.test_data_dict, actual_ret)
@@ -598,23 +598,23 @@ class TestCosmosMonitor(unittest.TestCase):
         (ChunkedEncodingError('test'), DataReadingException, True,),
         (ProtocolError('test'), DataReadingException, False,),
         (ProtocolError('test'), DataReadingException, True,),
-        (TendermintRPCIncompatibleException('test_node'),
-         TendermintRPCIncompatibleException, False,),
-        (TendermintRPCIncompatibleException('test_node'),
-         TendermintRPCIncompatibleException, True,),
-        (TendermintRPCCallException('test_call', 'err_msg'),
-         TendermintRPCCallException, False,),
-        (TendermintRPCCallException('test_call', 'err_msg'),
-         TendermintRPCCallException, True,),
+        (CometbftRPCIncompatibleException('test_node'),
+         CometbftRPCIncompatibleException, False,),
+        (CometbftRPCIncompatibleException('test_node'),
+         CometbftRPCIncompatibleException, True,),
+        (CometbftRPCCallException('test_call', 'err_msg'),
+         CometbftRPCCallException, False,),
+        (CometbftRPCCallException('test_call', 'err_msg'),
+         CometbftRPCCallException, True,),
         (KeyError('test'), IncorrectJSONRetrievedException, False,),
         (KeyError('test'), IncorrectJSONRetrievedException, True,)
     ])
-    def test_exec_cosmos_tendermint_ret_with_ex_detects_and_raises_ex_correctly(
+    def test_exec_cosmos_cometbft_ret_with_ex_detects_and_raises_ex_correctly(
             self, callback_raised_exception, expected_raised_exception,
             direct_retrieval) -> None:
         """
         In this test we will be checking that the
-        _execute_cosmos_tendermint_retrieval_with_exceptions function raises the
+        _execute_cosmos_cometbft_retrieval_with_exceptions function raises the
         correct exceptions if the callback raises an expected exception. Note
         that we will be checking each raised exception both with
         direct_retrieval True and False.
@@ -624,10 +624,10 @@ class TestCosmosMonitor(unittest.TestCase):
             raise callback_raised_exception
 
         source_name = self.data_sources[0].node_name
-        source_url = self.data_sources[0].tendermint_rpc_url
+        source_url = self.data_sources[0].cometbft_rpc_url
         self.assertRaises(
             expected_raised_exception, self.test_monitor.
-                _execute_cosmos_tendermint_retrieval_with_exceptions, test_fn,
+                _execute_cosmos_cometbft_retrieval_with_exceptions, test_fn,
             source_name, source_url, direct_retrieval
         )
 
@@ -682,46 +682,46 @@ class TestCosmosMonitor(unittest.TestCase):
             call(test_fn, test_args_second, node_name, self.sdk_version_0_42_6),
         ])
 
-    @mock.patch.object(TendermintRpcApiWrapper, 'execute_with_checks')
-    def test_get_tendermint_data_with_count_returns_correctly(
+    @mock.patch.object(CometbftRpcApiWrapper, 'execute_with_checks')
+    def test_get_cometbft_data_with_count_returns_correctly(
             self, mock_execute) -> None:
         """
         In this test we will check that the data returned by
-        _get_tendermint_data_with_count is a list of API call return values,
+        _get_cometbft_data_with_count is a list of API call return values,
         i.e. paginated data
         """
 
         def test_fn():
             return self.test_data_dict
 
-        mock_execute.side_effect = [self.tendermint_ret_1,
-                                    self.tendermint_ret_2]
+        mock_execute.side_effect = [self.cometbft_ret_1,
+                                    self.cometbft_ret_2]
         node_name = self.data_sources[0].node_name
-        actual_ret = self.test_monitor._get_tendermint_data_with_count(
+        actual_ret = self.test_monitor._get_cometbft_data_with_count(
             test_fn, [], {}, node_name)
-        self.assertEqual([self.tendermint_ret_1, self.tendermint_ret_2],
+        self.assertEqual([self.cometbft_ret_1, self.cometbft_ret_2],
                          actual_ret)
 
-    @mock.patch.object(TendermintRpcApiWrapper, 'execute_with_checks')
-    def test_get_tendermint_data_with_count_performs_correct_calls(
+    @mock.patch.object(CometbftRpcApiWrapper, 'execute_with_checks')
+    def test_get_cometbft_data_with_count_performs_correct_calls(
             self, mock_execute) -> None:
         """
         In this test we will be checking that the
-        _get_tendermint_data_with_count performs a series of Cosmos Tendermint
+        _get_cometbft_data_with_count performs a series of Cosmos Cometbft
         API calls correctly
         """
 
         def test_fn():
             return self.test_data_dict
 
-        mock_execute.side_effect = [self.tendermint_ret_1,
-                                    self.tendermint_ret_2]
+        mock_execute.side_effect = [self.cometbft_ret_1,
+                                    self.cometbft_ret_2]
         node_name = self.data_sources[0].node_name
         test_args = ['arg_1', 'arg_2']
         test_params = {'param_1': 'param_1_val', 'param_2': 'param_2_val'}
         test_args_first = ['arg_1', 'arg_2', {**test_params, 'page': 1}]
         test_args_second = ['arg_1', 'arg_2', {**test_params, 'page': 2}]
-        self.test_monitor._get_tendermint_data_with_count(
+        self.test_monitor._get_cometbft_data_with_count(
             test_fn, test_args, test_params, node_name)
 
         calls = mock_execute.call_args_list

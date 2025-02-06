@@ -125,10 +125,10 @@ describe('allElementsInListHaveTypeString', () => {
 
 describe('verifyPrometheusPing', () => {
     it.each([
-        ['tendermint_consensus_height', 'cosmos'],
+        ['cometbft_consensus_height', 'cosmos'],
         ['max_unconfirmed_blocks[test]', 'chainlink'],
         ['testing\nmax_unconfirmed_blocks 123', 'chainlink'],
-        ['tendermint_consensus_height[test]\ntest_metric', 'cosmos'],
+        ['cometbft_consensus_height[test]\ntest_metric', 'cosmos'],
         ['', 'other_chain'],
     ])('Should return true when metric of a given base chain is in prometheus ping data',
         (prometheusPingData: string, baseChain: string) => {

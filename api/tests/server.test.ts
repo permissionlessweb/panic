@@ -1217,8 +1217,8 @@ describe('Ping Cosmos Service - Cosmos REST POST Route', () => {
         });
 });
 
-describe('Ping Cosmos Service - Tendermint RPC POST Route', () => {
-    const endpoint = '/server/cosmos/tendermint-rpc';
+describe('Ping Cosmos Service - Cometbft RPC POST Route', () => {
+    const endpoint = '/server/cosmos/cometbft-rpc';
 
     it('Should return error and status code if missing url in body', async () => {
         let expectedReturn = new MissingKeysInBody('url');
@@ -1227,7 +1227,7 @@ describe('Ping Cosmos Service - Tendermint RPC POST Route', () => {
         expect(res.body).toEqual({error: expectedReturn.message});
     });
 
-    it('Should return correct result and a successful status code if tendermint rpc does not return an error',
+    it('Should return correct result and a successful status code if cometbft rpc does not return an error',
         async () => {
             const resp: AxiosResponse = emptyAxiosResponse({jsonrpc: 'test'});
             axiosMock.get.mockResolvedValue(resp);
@@ -1236,7 +1236,7 @@ describe('Ping Cosmos Service - Tendermint RPC POST Route', () => {
             expect(res.body).toEqual({result: PingStatus.SUCCESS});
         });
 
-    it('Should return ping error and status code 400 if tendermint rpc returns an error',
+    it('Should return ping error and status code 400 if cometbft rpc returns an error',
         async () => {
             axiosMock.get.mockResolvedValue(emptyAxiosResponse());
             const res = await request(app).post(endpoint).send({'url': 'test_url.com'});
@@ -1244,7 +1244,7 @@ describe('Ping Cosmos Service - Tendermint RPC POST Route', () => {
             expect(res.body).toEqual({result: PingStatus.ERROR});
         });
 
-    it('Should return ping timeout and status code 408 if tendermint rpc returns a time out error',
+    it('Should return ping timeout and status code 408 if cometbft rpc returns a time out error',
         async () => {
             axiosMock.get.mockRejectedValue({code: 'ECONNABORTED'})
             const res = await request(app).post(endpoint).send({'url': 'test_url.com'});

@@ -48,9 +48,9 @@ def get_load_number_state_helper(cosmos_node: CosmosNode) -> List[Dict]:
          'setter': cosmos_node.set_went_down_at_cosmos_rest,
          'redis_key': Keys.get_cosmos_node_went_down_at_cosmos_rest(node_id)},
         {'convert_fn': convert_to_float,
-         'state_value': cosmos_node.went_down_at_tendermint_rpc,
-         'setter': cosmos_node.set_went_down_at_tendermint_rpc,
-         'redis_key': Keys.get_cosmos_node_went_down_at_tendermint_rpc(
+         'state_value': cosmos_node.went_down_at_cometbft_rpc,
+         'setter': cosmos_node.set_went_down_at_cometbft_rpc,
+         'redis_key': Keys.get_cosmos_node_went_down_at_cometbft_rpc(
              node_id)},
         {'convert_fn': convert_to_int,
          'state_value': cosmos_node.current_height,
@@ -69,9 +69,9 @@ def get_load_number_state_helper(cosmos_node: CosmosNode) -> List[Dict]:
          'setter': cosmos_node.set_last_monitored_cosmos_rest,
          'redis_key': Keys.get_cosmos_node_last_monitored_cosmos_rest(node_id)},
         {'convert_fn': convert_to_float,
-         'state_value': cosmos_node.last_monitored_tendermint_rpc,
-         'setter': cosmos_node.set_last_monitored_tendermint_rpc,
-         'redis_key': Keys.get_cosmos_node_last_monitored_tendermint_rpc(
+         'state_value': cosmos_node.last_monitored_cometbft_rpc,
+         'setter': cosmos_node.set_last_monitored_cometbft_rpc,
+         'redis_key': Keys.get_cosmos_node_last_monitored_cometbft_rpc(
              node_id)},
     ]
 

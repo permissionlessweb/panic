@@ -16,7 +16,7 @@ from requests.exceptions import (ConnectionError as ReqConnectionError,
 from urllib3.exceptions import ProtocolError
 
 from src.api_wrappers.cosmos import (CosmosRestServerApiWrapper,
-                                     TendermintRpcApiWrapper)
+                                     CometbftRpcApiWrapper)
 from src.message_broker.rabbitmq import RabbitMQApi
 from src.monitors.node.cosmos import CosmosNodeMonitor
 from src.utils import env
@@ -31,8 +31,8 @@ from src.utils.exceptions import (
     CosmosSDKVersionIncompatibleException, CosmosRestServerApiCallException,
     DataReadingException, CannotConnectWithDataSourceException,
     IncorrectJSONRetrievedException, CosmosRestServerDataCouldNotBeObtained,
-    TendermintRPCCallException, TendermintRPCDataCouldNotBeObtained,
-    TendermintRPCIncompatibleException, MetricNotFoundException,
+    CometbftRPCCallException, CometbftRPCDataCouldNotBeObtained,
+    CometbftRPCIncompatibleException, MetricNotFoundException,
     MessageWasNotDeliveredException)
 from test.test_utils.utils import (
     connect_to_rabbit, delete_queue_if_exists, delete_exchange_if_exists,
@@ -63,28 +63,28 @@ class TestCosmosNodeMonitor(unittest.TestCase):
         self.test_consensus_address = 'test_consensus_address'
         self.test_is_syncing = False
         self.test_is_peered_with_sentinel = True
-        self.test_is_mev_tendermint_node = False
+        self.test_is_mev_cometbft_node = False
 
         # --------------- Data retrieval variables and examples ---------------
         # Prometheus
         self.prometheus_metrics = {
-            'tendermint_consensus_latest_block_height': 'strict',
-            'tendermint_consensus_validator_power': 'optional',
+            'cometbft_consensus_latest_block_height': 'strict',
+            'cometbft_consensus_validator_power': 'optional',
         }
         self.retrieved_prometheus_data_example_1 = {
-            'tendermint_consensus_latest_block_height': {
+            'cometbft_consensus_latest_block_height': {
                 '{"chain_id": "cosmoshub-4"}': 8137538.0
             },
-            'tendermint_consensus_validator_power': {
+            'cometbft_consensus_validator_power': {
                 '{"chain_id": "cosmoshub-4", "validator_address": '
                 '"7B3D01F754DFF8474ED0E358812FD437E09389DC"}': 725315.0
             }
         }
         self.retrieved_prometheus_data_example_2 = {
-            'tendermint_consensus_latest_block_height': {
+            'cometbft_consensus_latest_block_height': {
                 '{"chain_id": "cosmoshub-4"}': 538.0
             },
-            'tendermint_consensus_validator_power': {
+            'cometbft_consensus_validator_power': {
                 '{"chain_id": "cosmoshub-4", "validator_address": '
                 '"7B3D01F754DFF8474ED0E358812FD437E09389DC"}': None
             }
@@ -103,19 +103,19 @@ class TestCosmosNodeMonitor(unittest.TestCase):
             **self.retrieved_cosmos_rest_indirect_data_1,
         }
 
-        # Tendermint
-        self.retrieved_tendermint_direct_data_mev = {
+        # Cometbft
+        self.retrieved_cometbft_direct_data_mev = {
             'consensus_hex_address': self.test_consensus_address,
             'is_syncing': self.test_is_syncing,
             'is_peered_with_sentinel': self.test_is_peered_with_sentinel,
         }
 
-        self.retrieved_tendermint_direct_data = {
+        self.retrieved_cometbft_direct_data = {
             'consensus_hex_address': self.test_consensus_address,
             'is_syncing': self.test_is_syncing
         }
 
-        self.retrieved_tendermint_archive_data = {
+        self.retrieved_cometbft_archive_data = {
             'historical': [
                 {
                     'height': 52,
@@ -140,25 +140,25 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                 },
             ],
         }
-        self.retrieved_tendermint_rpc_data = {
-            **self.retrieved_tendermint_archive_data,
+        self.retrieved_cometbft_rpc_data = {
+            **self.retrieved_cometbft_archive_data,
             'is_syncing': self.test_is_syncing,
         }
 
-        self.retrieved_tendermint_rpc_data_mev = {
-            **self.retrieved_tendermint_archive_data,
+        self.retrieved_cometbft_rpc_data_mev = {
+            **self.retrieved_cometbft_archive_data,
             'is_syncing': self.test_is_syncing,
             'is_peered_with_sentinel': self.test_is_peered_with_sentinel,
         }
 
         # Processed retrieved data example
         self.processed_prometheus_data_example_1 = {
-            'tendermint_consensus_latest_block_height': 8137538.0,
-            'tendermint_consensus_validator_power': 725315.0,
+            'cometbft_consensus_latest_block_height': 8137538.0,
+            'cometbft_consensus_validator_power': 725315.0,
         }
         self.processed_prometheus_data_example_2 = {
-            'tendermint_consensus_latest_block_height': 538.0,
-            'tendermint_consensus_validator_power': 0,
+            'cometbft_consensus_latest_block_height': 538.0,
+            'cometbft_consensus_validator_power': 0,
         }
 
         # Test monitor instance
@@ -194,20 +194,20 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                     self.test_monitor._process_retrieved_cosmos_rest_data,
                 'monitoring_enabled': True
             },
-            'tendermint_rpc': {
-                'data': self.retrieved_tendermint_rpc_data,
+            'cometbft_rpc': {
+                'data': self.retrieved_cometbft_rpc_data,
                 'data_retrieval_failed': False,
                 'data_retrieval_exception': None,
-                'get_function': self.test_monitor._get_tendermint_rpc_data,
+                'get_function': self.test_monitor._get_cometbft_rpc_data,
                 'processing_function':
-                    self.test_monitor._process_retrieved_tendermint_rpc_data,
+                    self.test_monitor._process_retrieved_cometbft_rpc_data,
                 'monitoring_enabled': True
             },
         }
 
         self.received_retrieval_info_all_sources_mev = copy.deepcopy(self.received_retrieval_info_all_source_types_enabled)
-        self.received_retrieval_info_all_sources_mev['tendermint_rpc']['data'] = self.retrieved_tendermint_rpc_data_mev
-        self.received_retrieval_info_all_sources_mev['tendermint_rpc']['processing_function'] = self.test_monitor._process_retrieved_tendermint_rpc_data
+        self.received_retrieval_info_all_sources_mev['cometbft_rpc']['data'] = self.retrieved_cometbft_rpc_data_mev
+        self.received_retrieval_info_all_sources_mev['cometbft_rpc']['processing_function'] = self.test_monitor._process_retrieved_cometbft_rpc_data
         self.received_retrieval_info_all_sources_mev['cosmos_rest']['processing_function'] = self.test_monitor._process_retrieved_cosmos_rest_data
         self.received_retrieval_info_all_sources_mev['prometheus']['processing_function'] = self.test_monitor._process_retrieved_prometheus_data
 
@@ -230,13 +230,13 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                     self.test_monitor._process_retrieved_cosmos_rest_data,
                 'monitoring_enabled': True
             },
-            'tendermint_rpc': {
-                'data': self.retrieved_tendermint_rpc_data,
+            'cometbft_rpc': {
+                'data': self.retrieved_cometbft_rpc_data,
                 'data_retrieval_failed': False,
                 'data_retrieval_exception': None,
-                'get_function': self.test_monitor._get_tendermint_rpc_data,
+                'get_function': self.test_monitor._get_cometbft_rpc_data,
                 'processing_function':
-                    self.test_monitor._process_retrieved_tendermint_rpc_data,
+                    self.test_monitor._process_retrieved_cometbft_rpc_data,
                 'monitoring_enabled': True
             },
         }
@@ -259,13 +259,13 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                     self.test_monitor._process_retrieved_cosmos_rest_data,
                 'monitoring_enabled': True
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'data': {},
                 'data_retrieval_failed': True,
                 'data_retrieval_exception': self.test_exception_3,
-                'get_function': self.test_monitor._get_tendermint_rpc_data,
+                'get_function': self.test_monitor._get_cometbft_rpc_data,
                 'processing_function':
-                    self.test_monitor._process_retrieved_tendermint_rpc_data,
+                    self.test_monitor._process_retrieved_cometbft_rpc_data,
                 'monitoring_enabled': True
             },
         }
@@ -318,15 +318,15 @@ class TestCosmosNodeMonitor(unittest.TestCase):
         self.assertEqual(self.prometheus_metrics,
                          self.test_monitor.prometheus_metrics)
 
-    def test_last_height_monitored_tendermint_ret_lh_monitored_tendermint(
+    def test_last_height_monitored_cometbft_ret_lh_monitored_cometbft(
             self) -> None:
-        # Test that on init, last_height_monitored_tendermint is None
-        self.assertIsNone(self.test_monitor.last_height_monitored_tendermint)
+        # Test that on init, last_height_monitored_cometbft is None
+        self.assertIsNone(self.test_monitor.last_height_monitored_cometbft)
 
         # Test that the property returns the correct value
-        self.test_monitor._last_height_monitored_tendermint = 500
+        self.test_monitor._last_height_monitored_cometbft = 500
         self.assertEqual(500,
-                         self.test_monitor.last_height_monitored_tendermint)
+                         self.test_monitor.last_height_monitored_cometbft)
 
     def test_validator_consensus_address_returns_validator_consensus_address(
             self) -> None:
@@ -389,7 +389,7 @@ class TestCosmosNodeMonitor(unittest.TestCase):
          {'jailed': False, 'bond_status': BOND_STATUS_UNBONDED},),
     ])
     @mock.patch.object(CosmosRestServerApiWrapper,
-                       'get_staking_validators_v0_42_6')
+                       'get_staking_validators')
     def test_get_cosmos_rest_v0_42_6_indirect_data_validator_return(
             self, staking_validators_return, expected_return,
             mock_staking_validators) -> None:
@@ -811,8 +811,8 @@ class TestCosmosNodeMonitor(unittest.TestCase):
             self.data_sources[2].node_name))
         self.assertEqual(expected_ret, actual_ret)
 
-    @mock.patch.object(TendermintRpcApiWrapper, 'get_status')
-    def test_get_tendermint_rpc_direct_data_return(
+    @mock.patch.object(CometbftRpcApiWrapper, 'get_status')
+    def test_get_cometbft_rpc_direct_data_return(
             self, mock_get_status) -> None:
         """
         We will check that the return is as expected for all responses without a mev_info key
@@ -828,11 +828,11 @@ class TestCosmosNodeMonitor(unittest.TestCase):
             }
         }
 
-        actual_return = self.test_monitor._get_tendermint_rpc_direct_data()
-        self.assertEqual(self.retrieved_tendermint_direct_data, actual_return)
+        actual_return = self.test_monitor._get_cometbft_rpc_direct_data()
+        self.assertEqual(self.retrieved_cometbft_direct_data, actual_return)
 
-    @mock.patch.object(TendermintRpcApiWrapper, 'get_status')
-    def test_get_tendermint_rpc_direct_data_return_mev_info(
+    @mock.patch.object(CometbftRpcApiWrapper, 'get_status')
+    def test_get_cometbft_rpc_direct_data_return_mev_info(
             self, mock_get_status) -> None:
         """
         We will check that the return is as expected when mev_info exists
@@ -851,8 +851,8 @@ class TestCosmosNodeMonitor(unittest.TestCase):
             }
         }
 
-        actual_return_mev = self.test_monitor._get_tendermint_rpc_direct_data()
-        self.assertEqual(self.retrieved_tendermint_direct_data_mev, actual_return_mev)
+        actual_return_mev = self.test_monitor._get_cometbft_rpc_direct_data()
+        self.assertEqual(self.retrieved_cometbft_direct_data_mev, actual_return_mev)
 
     @parameterized.expand([
         (None, 1000, True, 999,),
@@ -864,16 +864,16 @@ class TestCosmosNodeMonitor(unittest.TestCase):
         (699, 1000, True, 700,),
         (699, 1000, False, 911,),
     ])
-    def test_determine_last_height_monitored_tendermint(
+    def test_determine_last_height_monitored_cometbft(
             self, current_last_height, current_height, is_source_archive,
             expected_return) -> None:
         """
         In this test we will check that
-        _determine_last_height_monitored_tendermint is determined correctly for
+        _determine_last_height_monitored_cometbft is determined correctly for
         different input types.
         """
         actual_return = \
-            self.test_monitor._determine_last_height_monitored_tendermint(
+            self.test_monitor._determine_last_height_monitored_cometbft(
                 current_last_height, current_height, is_source_archive)
         self.assertEqual(expected_return, actual_return)
 
@@ -1232,10 +1232,10 @@ class TestCosmosNodeMonitor(unittest.TestCase):
             begin_block_events)
         self.assertEqual(expected_return, actual_return)
 
-    @mock.patch.object(TendermintRpcApiWrapper, 'get_block')
-    @mock.patch.object(TendermintRpcApiWrapper, 'get_validators')
-    @mock.patch.object(TendermintRpcApiWrapper, 'get_block_results')
-    def test_get_tendermint_rpc_archive_data_validator_return(
+    @mock.patch.object(CometbftRpcApiWrapper, 'get_block')
+    @mock.patch.object(CometbftRpcApiWrapper, 'get_validators')
+    @mock.patch.object(CometbftRpcApiWrapper, 'get_block_results')
+    def test_get_cometbft_rpc_archive_data_validator_return(
             self, mock_get_block_results, mock_get_validators,
             mock_get_block) -> None:
         """
@@ -1243,7 +1243,7 @@ class TestCosmosNodeMonitor(unittest.TestCase):
         """
         test_hex_address = "7B3D01F754DFF8474ED0E358812FD437E09389DC"
         self.test_monitor._validator_consensus_address = test_hex_address
-        self.test_monitor._last_height_monitored_tendermint = 49
+        self.test_monitor._last_height_monitored_cometbft = 49
         mock_get_block.side_effect = [
             {
                 "result": {
@@ -1433,56 +1433,56 @@ class TestCosmosNodeMonitor(unittest.TestCase):
         ]
 
         actual_return = \
-            self.test_monitor._get_tendermint_rpc_archive_data_validator(
+            self.test_monitor._get_cometbft_rpc_archive_data_validator(
                 self.data_sources[0])
-        self.assertEqual(self.retrieved_tendermint_archive_data, actual_return)
-        self.assertEqual(52, self.test_monitor.last_height_monitored_tendermint)
+        self.assertEqual(self.retrieved_cometbft_archive_data, actual_return)
+        self.assertEqual(52, self.test_monitor.last_height_monitored_cometbft)
 
     @parameterized.expand([
         (False,),
         ('',),
         (None,)
     ])
-    def test_get_tendermint_rpc_archive_data_return_if_source_url_falsy(
-            self, tendermint_rpc_url) -> None:
+    def test_get_cometbft_rpc_archive_data_return_if_source_url_falsy(
+            self, cometbft_rpc_url) -> None:
         """
         In this test we will check that if the node passed as data source has
-        a falsy tendermint_rpc_url, then the function will return default data
+        a falsy cometbft_rpc_url, then the function will return default data
         """
         data_source = self.data_sources[0]
-        data_source._tendermint_rpc_url = tendermint_rpc_url
-        actual_ret = self.test_monitor._get_tendermint_rpc_archive_data(
+        data_source._cometbft_rpc_url = cometbft_rpc_url
+        actual_ret = self.test_monitor._get_cometbft_rpc_archive_data(
             data_source)
         self.assertEqual({'historical': None}, actual_ret)
 
     @mock.patch.object(CosmosNodeMonitor,
-                       '_get_tendermint_rpc_archive_data_validator')
-    def test_get_tendermint_rpc_archive_data_return_if_validator(
+                       '_get_cometbft_rpc_archive_data_validator')
+    def test_get_cometbft_rpc_archive_data_return_if_validator(
             self, mock_get_archive) -> None:
         """
         In this test we will check that if the node being monitored is a
         validator, then the function will return the retrieved archive metrics
         """
-        mock_get_archive.return_value = self.retrieved_tendermint_archive_data
-        actual_ret = self.test_monitor._get_tendermint_rpc_archive_data(
+        mock_get_archive.return_value = self.retrieved_cometbft_archive_data
+        actual_ret = self.test_monitor._get_cometbft_rpc_archive_data(
             self.data_sources[0])
-        self.assertEqual(self.retrieved_tendermint_archive_data, actual_ret)
+        self.assertEqual(self.retrieved_cometbft_archive_data, actual_ret)
 
-    def test_get_tendermint_rpc_archive_data_return_if_non_validator(
+    def test_get_cometbft_rpc_archive_data_return_if_non_validator(
             self) -> None:
         """
         In this test we will check that if the node being monitored is not a
         validator, then default data will be returned by
-        _get_tendermint_rpc_archive_data
+        _get_cometbft_rpc_archive_data
         """
         self.test_monitor._node_config._is_validator = False
-        actual_ret = self.test_monitor._get_tendermint_rpc_archive_data(
+        actual_ret = self.test_monitor._get_cometbft_rpc_archive_data(
             self.data_sources[0])
         self.assertEqual({'historical': []}, actual_ret)
 
-    @mock.patch.object(CosmosNodeMonitor, '_select_cosmos_tendermint_node')
-    @mock.patch.object(CosmosNodeMonitor, '_get_tendermint_rpc_direct_data')
-    def test_get_tendermint_rpc_data_return_if_no_archive_source_selected(
+    @mock.patch.object(CosmosNodeMonitor, '_select_cosmos_cometbft_node')
+    @mock.patch.object(CosmosNodeMonitor, '_get_cometbft_rpc_direct_data')
+    def test_get_cometbft_rpc_data_return_if_no_archive_source_selected(
             self, mock_select_node, mock_direct_data_retrieval) -> None:
         # This test assumes that the direct data retrieval is successful
         mock_direct_data_retrieval.return_value = None
@@ -1490,52 +1490,52 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                                              self.test_consensus_address,
                                          'is_syncing':
                                              self.test_is_syncing}
-        actual_ret = self.test_monitor._get_tendermint_rpc_data()
+        actual_ret = self.test_monitor._get_cometbft_rpc_data()
         self.assertEqual(
             ({}, True, NoSyncedDataSourceWasAccessibleException(
-                self.monitor_name, 'archive/indirect Tendermint RPC node')),
+                self.monitor_name, 'archive/indirect Cometbft RPC node')),
             actual_ret)
 
-    @mock.patch.object(CosmosNodeMonitor, '_get_tendermint_rpc_archive_data')
-    @mock.patch.object(CosmosNodeMonitor, '_get_tendermint_rpc_direct_data')
-    @mock.patch.object(CosmosNodeMonitor, '_select_cosmos_tendermint_node')
-    def test_get_tendermint_rpc_data_sets_cons_address_if_not_None_or_empty(
+    @mock.patch.object(CosmosNodeMonitor, '_get_cometbft_rpc_archive_data')
+    @mock.patch.object(CosmosNodeMonitor, '_get_cometbft_rpc_direct_data')
+    @mock.patch.object(CosmosNodeMonitor, '_select_cosmos_cometbft_node')
+    def test_get_cometbft_rpc_data_sets_cons_address_if_not_None_or_empty(
             self, mock_select_node, mock_get_direct_data,
             mock_get_archive_data) -> None:
         mock_select_node.return_value = self.data_sources[0]
         mock_get_direct_data.return_value = \
-            self.retrieved_tendermint_direct_data
+            self.retrieved_cometbft_direct_data
         mock_get_archive_data.return_value = \
-            self.retrieved_tendermint_archive_data
+            self.retrieved_cometbft_archive_data
 
-        self.test_monitor._get_tendermint_rpc_data()
+        self.test_monitor._get_cometbft_rpc_data()
         self.assertEqual(self.test_consensus_address,
                          self.test_monitor.validator_consensus_address)
 
-    @mock.patch.object(CosmosNodeMonitor, '_get_tendermint_rpc_archive_data')
-    @mock.patch.object(CosmosNodeMonitor, '_get_tendermint_rpc_direct_data')
-    @mock.patch.object(CosmosNodeMonitor, '_select_cosmos_tendermint_node')
-    def test_get_tendermint_rpc_data_sets_peered_with_sentinel(
+    @mock.patch.object(CosmosNodeMonitor, '_get_cometbft_rpc_archive_data')
+    @mock.patch.object(CosmosNodeMonitor, '_get_cometbft_rpc_direct_data')
+    @mock.patch.object(CosmosNodeMonitor, '_select_cosmos_cometbft_node')
+    def test_get_cometbft_rpc_data_sets_peered_with_sentinel(
             self, mock_select_node, mock_get_direct_data,
             mock_get_archive_data) -> None:
         mock_select_node.return_value = self.data_sources[0]
         mock_get_direct_data.return_value = \
-            self.retrieved_tendermint_direct_data_mev
+            self.retrieved_cometbft_direct_data_mev
         mock_get_archive_data.return_value = \
-            self.retrieved_tendermint_archive_data
+            self.retrieved_cometbft_archive_data
 
-        actual_return = self.test_monitor._get_tendermint_rpc_data()
+        actual_return = self.test_monitor._get_cometbft_rpc_data()
         self.assertEqual(actual_return[0],
-                         self.retrieved_tendermint_rpc_data_mev)
+                         self.retrieved_cometbft_rpc_data_mev)
 
     @parameterized.expand([
         ('',),
         (None,),
     ])
-    @mock.patch.object(CosmosNodeMonitor, '_get_tendermint_rpc_archive_data')
-    @mock.patch.object(CosmosNodeMonitor, '_get_tendermint_rpc_direct_data')
-    @mock.patch.object(CosmosNodeMonitor, '_select_cosmos_tendermint_node')
-    def test_get_tendermint_rpc_data_does_not_set_cons_address_if_empty_or_None(
+    @mock.patch.object(CosmosNodeMonitor, '_get_cometbft_rpc_archive_data')
+    @mock.patch.object(CosmosNodeMonitor, '_get_cometbft_rpc_direct_data')
+    @mock.patch.object(CosmosNodeMonitor, '_select_cosmos_cometbft_node')
+    def test_get_cometbft_rpc_data_does_not_set_cons_address_if_empty_or_None(
             self, retrieved_cons_address, mock_select_node,
             mock_get_direct_data, mock_get_archive_data) -> None:
         mock_select_node.return_value = self.data_sources[0]
@@ -1543,63 +1543,63 @@ class TestCosmosNodeMonitor(unittest.TestCase):
             'consensus_hex_address': retrieved_cons_address
         }
         mock_get_archive_data.return_value = \
-            self.retrieved_tendermint_archive_data
+            self.retrieved_cometbft_archive_data
 
-        self.test_monitor._get_tendermint_rpc_data()
+        self.test_monitor._get_cometbft_rpc_data()
         self.assertIsNone(self.test_monitor.validator_consensus_address)
 
-    @mock.patch.object(CosmosNodeMonitor, '_get_tendermint_rpc_archive_data')
-    @mock.patch.object(CosmosNodeMonitor, '_get_tendermint_rpc_direct_data')
-    @mock.patch.object(CosmosNodeMonitor, '_select_cosmos_tendermint_node')
-    def test_get_tendermint_rpc_data_ret_if_archive_data_retrieved_successfully(
+    @mock.patch.object(CosmosNodeMonitor, '_get_cometbft_rpc_archive_data')
+    @mock.patch.object(CosmosNodeMonitor, '_get_cometbft_rpc_direct_data')
+    @mock.patch.object(CosmosNodeMonitor, '_select_cosmos_cometbft_node')
+    def test_get_cometbft_rpc_data_ret_if_archive_data_retrieved_successfully(
             self, mock_select_node, mock_get_direct_data,
             mock_get_archive_data) -> None:
         mock_select_node.return_value = self.data_sources[0]
         mock_get_direct_data.return_value = \
-            self.retrieved_tendermint_direct_data
+            self.retrieved_cometbft_direct_data
         mock_get_archive_data.return_value = \
-            self.retrieved_tendermint_archive_data
-        actual_ret = self.test_monitor._get_tendermint_rpc_data()
-        self.assertEqual((self.retrieved_tendermint_rpc_data, False, None),
+            self.retrieved_cometbft_archive_data
+        actual_ret = self.test_monitor._get_cometbft_rpc_data()
+        self.assertEqual((self.retrieved_cometbft_rpc_data, False, None),
                          actual_ret)
 
-    @mock.patch.object(CosmosNodeMonitor, '_get_tendermint_rpc_archive_data')
-    @mock.patch.object(CosmosNodeMonitor, '_get_tendermint_rpc_direct_data')
-    @mock.patch.object(CosmosNodeMonitor, '_select_cosmos_tendermint_node')
-    def test_get_tendermint_rpc_data_ret_if_peering_data_retrieved_successfully(
+    @mock.patch.object(CosmosNodeMonitor, '_get_cometbft_rpc_archive_data')
+    @mock.patch.object(CosmosNodeMonitor, '_get_cometbft_rpc_direct_data')
+    @mock.patch.object(CosmosNodeMonitor, '_select_cosmos_cometbft_node')
+    def test_get_cometbft_rpc_data_ret_if_peering_data_retrieved_successfully(
             self, mock_select_node, mock_get_direct_data,
             mock_get_archive_data) -> None:
         mock_select_node.return_value = self.data_sources[0]
         mock_get_archive_data.return_value = \
-            self.retrieved_tendermint_archive_data
+            self.retrieved_cometbft_archive_data
         ## update mock direct response data
         mock_get_direct_data.return_value = \
-            self.retrieved_tendermint_direct_data_mev
-        actual_ret_mev = self.test_monitor._get_tendermint_rpc_data()
-        self.assertEqual((self.retrieved_tendermint_rpc_data_mev, False, None), actual_ret_mev)
+            self.retrieved_cometbft_direct_data_mev
+        actual_ret_mev = self.test_monitor._get_cometbft_rpc_data()
+        self.assertEqual((self.retrieved_cometbft_rpc_data_mev, False, None), actual_ret_mev)
 
     @parameterized.expand([
         (NodeIsDownException('node_name_1'),
          NodeIsDownException('node_name_1'),),
-        (DataReadingException('test_monitor', 'tendermint_rpc_url_1'),
-         DataReadingException('test_monitor', 'tendermint_rpc_url_1')),
-        (InvalidUrlException('tendermint_rpc_url_1'),
-         InvalidUrlException('tendermint_rpc_url_1')),
+        (DataReadingException('test_monitor', 'cometbft_rpc_url_1'),
+         DataReadingException('test_monitor', 'cometbft_rpc_url_1')),
+        (InvalidUrlException('cometbft_rpc_url_1'),
+         InvalidUrlException('cometbft_rpc_url_1')),
         (IncorrectJSONRetrievedException('REST', 'err'),
-         TendermintRPCDataCouldNotBeObtained('node_name_1')),
-        (TendermintRPCCallException('call', 'call_failed'),
-         TendermintRPCCallException('call', 'call_failed')),
-        (TendermintRPCIncompatibleException('node_name_1'),
-         TendermintRPCDataCouldNotBeObtained('node_name_1')),
+         CometbftRPCDataCouldNotBeObtained('node_name_1')),
+        (CometbftRPCCallException('call', 'call_failed'),
+         CometbftRPCCallException('call', 'call_failed')),
+        (CometbftRPCIncompatibleException('node_name_1'),
+         CometbftRPCDataCouldNotBeObtained('node_name_1')),
     ])
-    @mock.patch.object(CosmosNodeMonitor, '_get_tendermint_rpc_direct_data')
-    @mock.patch.object(CosmosNodeMonitor, '_select_cosmos_tendermint_node')
-    def test_get_tendermint_rpc_data_ret_if_direct_data_retrieval_error(
+    @mock.patch.object(CosmosNodeMonitor, '_get_cometbft_rpc_direct_data')
+    @mock.patch.object(CosmosNodeMonitor, '_select_cosmos_cometbft_node')
+    def test_get_cometbft_rpc_data_ret_if_direct_data_retrieval_error(
             self, raised_err, returned_err, mock_select_node,
             mock_get_direct) -> None:
         mock_select_node.return_value = self.data_sources[0]
         mock_get_direct.side_effect = raised_err
-        actual_ret = self.test_monitor._get_tendermint_rpc_data()
+        actual_ret = self.test_monitor._get_cometbft_rpc_data()
         self.assertEqual(({}, True, returned_err), actual_ret)
 
     @parameterized.expand([
@@ -1607,27 +1607,27 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                                               'err'),
          CannotConnectWithDataSourceException('test_monitor', 'node_name_1',
                                               'err'),),
-        (DataReadingException('test_monitor', 'tendermint_rpc_url_1'),
-         DataReadingException('test_monitor', 'tendermint_rpc_url_1')),
-        (InvalidUrlException('tendermint_rpc_url_1'),
-         InvalidUrlException('tendermint_rpc_url_1')),
+        (DataReadingException('test_monitor', 'cometbft_rpc_url_1'),
+         DataReadingException('test_monitor', 'cometbft_rpc_url_1')),
+        (InvalidUrlException('cometbft_rpc_url_1'),
+         InvalidUrlException('cometbft_rpc_url_1')),
         (IncorrectJSONRetrievedException('REST', 'err'),
-         TendermintRPCDataCouldNotBeObtained('node_name_1')),
-        (TendermintRPCCallException('call', 'call_failed'),
-         TendermintRPCCallException('call', 'call_failed')),
-        (TendermintRPCIncompatibleException('node_name_1'),
-         TendermintRPCDataCouldNotBeObtained('node_name_1')),
+         CometbftRPCDataCouldNotBeObtained('node_name_1')),
+        (CometbftRPCCallException('call', 'call_failed'),
+         CometbftRPCCallException('call', 'call_failed')),
+        (CometbftRPCIncompatibleException('node_name_1'),
+         CometbftRPCDataCouldNotBeObtained('node_name_1')),
     ])
-    @mock.patch.object(CosmosNodeMonitor, '_get_tendermint_rpc_archive_data')
-    @mock.patch.object(CosmosNodeMonitor, '_get_tendermint_rpc_direct_data')
-    @mock.patch.object(CosmosNodeMonitor, '_select_cosmos_tendermint_node')
-    def test_get_tendermint_rpc_data_ret_if_archive_data_retrieval_error(
+    @mock.patch.object(CosmosNodeMonitor, '_get_cometbft_rpc_archive_data')
+    @mock.patch.object(CosmosNodeMonitor, '_get_cometbft_rpc_direct_data')
+    @mock.patch.object(CosmosNodeMonitor, '_select_cosmos_cometbft_node')
+    def test_get_cometbft_rpc_data_ret_if_archive_data_retrieval_error(
             self, raised_err, returned_err, mock_select_node,
             mock_get_direct, mock_get_archive) -> None:
         mock_select_node.return_value = self.data_sources[0]
-        mock_get_direct.return_value = self.retrieved_tendermint_direct_data
+        mock_get_direct.return_value = self.retrieved_cometbft_direct_data
         mock_get_archive.side_effect = raised_err
-        actual_ret = self.test_monitor._get_tendermint_rpc_data()
+        actual_ret = self.test_monitor._get_cometbft_rpc_data()
         self.assertEqual(({}, True, returned_err), actual_ret)
 
     @mock.patch("src.monitors.node.cosmos.get_prometheus_metrics_data")
@@ -1680,28 +1680,28 @@ class TestCosmosNodeMonitor(unittest.TestCase):
         ('self.received_retrieval_info_all_source_types_enabled',
          ['self.retrieved_prometheus_data_example_1', False, None], True,
          ['self.retrieved_cosmos_rest_data_1', False, None], True,
-         ['self.retrieved_tendermint_rpc_data', False, None], True),
+         ['self.retrieved_cometbft_rpc_data', False, None], True),
         ('self.received_retrieval_info_all_sources_mev',
          ['self.retrieved_prometheus_data_example_1', False, None], True,
          ['self.retrieved_cosmos_rest_data_1', False, None], True,
-         ['self.retrieved_tendermint_rpc_data_mev', False, None], True),
+         ['self.retrieved_cometbft_rpc_data_mev', False, None], True),
         ('self.received_retrieval_info_some_sources_disabled', None, False,
          ['self.retrieved_cosmos_rest_data_1', False, None], True,
-         ['self.retrieved_tendermint_rpc_data', False, None], True),
+         ['self.retrieved_cometbft_rpc_data', False, None], True),
         ('self.received_retrieval_info_all_source_types_enabled_err',
          [{}, True, PANICException('test_exception_1', 1)], True,
          [{}, True, PANICException('test_exception_2', 2)], True,
          [{}, True, PANICException('test_exception_3', 3)], True),
     ])
-    @mock.patch.object(CosmosNodeMonitor, '_get_tendermint_rpc_data')
+    @mock.patch.object(CosmosNodeMonitor, '_get_cometbft_rpc_data')
     @mock.patch.object(CosmosNodeMonitor, '_get_cosmos_rest_data')
     @mock.patch.object(CosmosNodeMonitor, '_get_prometheus_data')
     def test_get_data_return(
             self, expected_ret, retrieved_prom_data, monitor_prom,
             retrieved_cosmos_rest_data, monitor_cosmos_rest,
-            retrieved_tendermint_rpc_data, monitor_tendermint_rpc,
+            retrieved_cometbft_rpc_data, monitor_cometbft_rpc,
             mock_get_prom_data, mock_get_cosmos_rest_data,
-            mock_get_tendermint_rpc_data) -> None:
+            mock_get_cometbft_rpc_data) -> None:
         """
         In this test we will check that the retrieval info is returned correctly
         for every possible test case. We will use parameterized.expand to
@@ -1723,28 +1723,28 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                     retrieved_cosmos_rest_data[0])
             mock_get_cosmos_rest_data.return_value = tuple(
                 retrieved_cosmos_rest_data)
-        if monitor_tendermint_rpc:
-            # If tendermint_rpc is to be monitored, then we have a list which
+        if monitor_cometbft_rpc:
+            # If cometbft_rpc is to be monitored, then we have a list which
             # needs to be converted to a tuple
-            if retrieved_tendermint_rpc_data[0]:
+            if retrieved_cometbft_rpc_data[0]:
                 # If the first element is a variable evaluate it
-                retrieved_tendermint_rpc_data[0] = eval(
-                    retrieved_tendermint_rpc_data[0])
-            mock_get_tendermint_rpc_data.return_value = tuple(
-                retrieved_tendermint_rpc_data)
+                retrieved_cometbft_rpc_data[0] = eval(
+                    retrieved_cometbft_rpc_data[0])
+            mock_get_cometbft_rpc_data.return_value = tuple(
+                retrieved_cometbft_rpc_data)
         self.test_monitor._node_config._monitor_prometheus = monitor_prom
         self.test_monitor._node_config._monitor_cosmos_rest = \
             monitor_cosmos_rest
 
-        self.test_monitor._node_config._monitor_tendermint_rpc = \
-            monitor_tendermint_rpc
+        self.test_monitor._node_config._monitor_cometbft_rpc = \
+            monitor_cometbft_rpc
 
         actual_ret = self.test_monitor._get_data()
         expected_ret = eval(expected_ret)
         expected_ret['cosmos_rest']['get_function'] = mock_get_cosmos_rest_data
         expected_ret['prometheus']['get_function'] = mock_get_prom_data
-        expected_ret['tendermint_rpc']['get_function'] = \
-            mock_get_tendermint_rpc_data
+        expected_ret['cometbft_rpc']['get_function'] = \
+            mock_get_cometbft_rpc_data
 
         self.assertEqual(expected_ret, actual_ret)
 
@@ -1792,7 +1792,7 @@ class TestCosmosNodeMonitor(unittest.TestCase):
         self.assertEqual(expected_ret, actual_ret)
 
     @freeze_time("2012-01-01")
-    def test_process_retrieved_tendermint_rpc_data_returns_expected_data(
+    def test_process_retrieved_cometbft_rpc_data_returns_expected_data(
             self) -> None:
         expected_ret = {
             'result': {
@@ -1802,7 +1802,7 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                     'node_id': self.test_monitor.node_config.node_id,
                     'node_parent_id': self.test_monitor.node_config.parent_id,
                     'time': datetime.now().timestamp(),
-                    'is_mev_tendermint_node': self.test_is_mev_tendermint_node,
+                    'is_mev_cometbft_node': self.test_is_mev_cometbft_node,
                     'is_validator': self.test_monitor.node_config.is_validator,
                     'operator_address':
                         self.test_monitor.node_config.operator_address,
@@ -1810,12 +1810,12 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                 'data': copy.deepcopy(self.test_data_dict),
             }
         }
-        actual_ret = self.test_monitor._process_retrieved_tendermint_rpc_data(
+        actual_ret = self.test_monitor._process_retrieved_cometbft_rpc_data(
             self.test_data_dict)
         self.assertEqual(expected_ret, actual_ret)
 
     @freeze_time("2012-01-01")
-    def test_process_retrieved_tendermint_rpc_data_returns_expected_data_when_node_is_mev(
+    def test_process_retrieved_cometbft_rpc_data_returns_expected_data_when_node_is_mev(
             self) -> None:
         expected_ret = {
             'result': {
@@ -1825,7 +1825,7 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                     'node_id': self.test_monitor.node_config.node_id,
                     'node_parent_id': self.test_monitor.node_config.parent_id,
                     'time': datetime.now().timestamp(),
-                    'is_mev_tendermint_node': True,
+                    'is_mev_cometbft_node': True,
                     'is_validator': self.test_monitor.node_config.is_validator,
                     'operator_address':
                         self.test_monitor.node_config.operator_address,
@@ -1833,9 +1833,9 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                 'data': copy.deepcopy(self.test_data_dict),
             }
         }
-        actual_ret = self.test_monitor._process_retrieved_tendermint_rpc_data(
-            self.retrieved_tendermint_direct_data_mev)
-        expected_ret['result']['data'] = self.retrieved_tendermint_direct_data_mev
+        actual_ret = self.test_monitor._process_retrieved_cometbft_rpc_data(
+            self.retrieved_cometbft_direct_data_mev)
+        expected_ret['result']['data'] = self.retrieved_cometbft_direct_data_mev
         self.assertEqual(expected_ret, actual_ret)
 
     @parameterized.expand([
@@ -1957,7 +1957,7 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                     'data': self.retrieved_cosmos_rest_data_1,
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'result': {
                     'meta_data': {
                         'monitor_name': self.test_monitor.monitor_name,
@@ -1966,13 +1966,13 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                         'node_parent_id':
                             self.test_monitor.node_config.parent_id,
                         'time': datetime(2012, 1, 1).timestamp(),
-                        'is_mev_tendermint_node': self.test_is_mev_tendermint_node,
+                        'is_mev_cometbft_node': self.test_is_mev_cometbft_node,
                         'is_validator':
                             self.test_monitor.node_config.is_validator,
                         'operator_address':
                             self.test_monitor.node_config.operator_address
                     },
-                    'data': self.retrieved_tendermint_rpc_data,
+                    'data': self.retrieved_cometbft_rpc_data,
                 }
             },
         }
@@ -2015,7 +2015,7 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                     'data': self.retrieved_cosmos_rest_data_1,
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'result': {
                     'meta_data': {
                         'monitor_name': self.test_monitor.monitor_name,
@@ -2024,13 +2024,13 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                         'node_parent_id':
                             self.test_monitor.node_config.parent_id,
                         'time': datetime(2012, 1, 1).timestamp(),
-                        'is_mev_tendermint_node': self.test_is_mev_tendermint_node,
+                        'is_mev_cometbft_node': self.test_is_mev_cometbft_node,
                         'is_validator':
                             self.test_monitor.node_config.is_validator,
                         'operator_address':
                             self.test_monitor.node_config.operator_address
                     },
-                    'data': self.retrieved_tendermint_rpc_data,
+                    'data': self.retrieved_cometbft_rpc_data,
                 }
             },
         }
@@ -2164,7 +2164,7 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                     'data': self.retrieved_cosmos_rest_data_1,
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'result': {
                     'meta_data': {
                         'monitor_name': self.test_monitor.monitor_name,
@@ -2173,13 +2173,13 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                         'node_parent_id':
                             self.test_monitor.node_config.parent_id,
                         'time': datetime(2012, 1, 1).timestamp(),
-                        'is_mev_tendermint_node': self.test_is_mev_tendermint_node,
+                        'is_mev_cometbft_node': self.test_is_mev_cometbft_node,
                         'is_validator':
                             self.test_monitor.node_config.is_validator,
                         'operator_address':
                             self.test_monitor.node_config.operator_address
                     },
-                    'data': self.retrieved_tendermint_rpc_data,
+                    'data': self.retrieved_cometbft_rpc_data,
                 }
             },
         })
@@ -2202,7 +2202,7 @@ class TestCosmosNodeMonitor(unittest.TestCase):
         expected_logged_data = self.test_monitor._display_data({
             'prometheus': {},
             'cosmos_rest': {},
-            'tendermint_rpc': {},
+            'cometbft_rpc': {},
         })
         mock_send_data.return_value = None
         mock_send_hb.return_value = None
@@ -2212,7 +2212,7 @@ class TestCosmosNodeMonitor(unittest.TestCase):
             'monitoring_enabled'] = False
         self.received_retrieval_info_all_source_types_enabled['cosmos_rest'][
             'monitoring_enabled'] = False
-        self.received_retrieval_info_all_source_types_enabled['tendermint_rpc'][
+        self.received_retrieval_info_all_source_types_enabled['cometbft_rpc'][
             'monitoring_enabled'] = False
         self.test_monitor._monitor()
         assert_not_called_with(mock_log, expected_logged_data)
@@ -2261,7 +2261,7 @@ class TestCosmosNodeMonitor(unittest.TestCase):
                     'code': self.test_exception_1.code,
                 }
             },
-            'tendermint_rpc': {
+            'cometbft_rpc': {
                 'result': {
                     'meta_data': {
                         'monitor_name': self.test_monitor.monitor_name,

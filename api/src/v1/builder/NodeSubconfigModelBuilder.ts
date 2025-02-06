@@ -96,14 +96,14 @@ export class NodeSubconfigModelBuilder implements IModelBuilder<NodeSubconfig> {
             alias: 'operatorAddress',
             default: null
         } as any;
-        entity.monitorTendermintRpc = {
+        entity.monitorCometbftRpc = {
             type: Boolean,
-            alias: 'monitorTendermintRpc',
+            alias: 'monitorCometbftRpc',
             default: null
         } as any;
-        entity.tendermintRpcUrl = {
+        entity.cometbftRpcUrl = {
             type: String,
-            alias: 'tendermintRpcUrl',
+            alias: 'cometbftRpcUrl',
             default: null
         } as any;
         entity.nodeWsUrl = {

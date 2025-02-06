@@ -116,10 +116,10 @@ class CosmosNodeAlertsConfigsFactory(CosmosAlertsConfigsFactory):
                 'cannot_access_cosmos_rest_validator'],
             cannot_access_cosmos_rest_node=filtered[
                 'cannot_access_cosmos_rest_node'],
-            cannot_access_tendermint_rpc_validator=filtered[
-                'cannot_access_tendermint_rpc_validator'],
-            cannot_access_tendermint_rpc_node=filtered[
-                'cannot_access_tendermint_rpc_node'],
+            cannot_access_cometbft_rpc_validator=filtered[
+                'cannot_access_cometbft_rpc_validator'],
+            cannot_access_cometbft_rpc_node=filtered[
+                'cannot_access_cometbft_rpc_node'],
             missed_blocks=filtered['missed_blocks'],
             slashed=filtered['slashed'],
             node_is_syncing=filtered['node_is_syncing'],

@@ -15,7 +15,7 @@ class CosmosNode(Node):
         # Metrics
         self._went_down_at_prometheus = None
         self._went_down_at_cosmos_rest = None
-        self._went_down_at_tendermint_rpc = None
+        self._went_down_at_cometbft_rpc = None
         self._current_height = None
         self._voting_power = None
         self._is_syncing = None
@@ -48,7 +48,7 @@ class CosmosNode(Node):
 
         # These store the timestamps of the last successful monitoring round.
         self._last_monitored_prometheus = None
-        self._last_monitored_tendermint_rpc = None
+        self._last_monitored_cometbft_rpc = None
         self._last_monitored_cosmos_rest = None
 
     @property
@@ -68,12 +68,12 @@ class CosmosNode(Node):
         return self._went_down_at_cosmos_rest
 
     @property
-    def is_down_tendermint_rpc(self) -> bool:
-        return self._went_down_at_tendermint_rpc is not None
+    def is_down_cometbft_rpc(self) -> bool:
+        return self._went_down_at_cometbft_rpc is not None
 
     @property
-    def went_down_at_tendermint_rpc(self) -> Optional[float]:
-        return self._went_down_at_tendermint_rpc
+    def went_down_at_cometbft_rpc(self) -> Optional[float]:
+        return self._went_down_at_cometbft_rpc
 
     @property
     def current_height(self) -> Optional[int]:
@@ -112,8 +112,8 @@ class CosmosNode(Node):
         return self._last_monitored_prometheus
 
     @property
-    def last_monitored_tendermint_rpc(self) -> Optional[float]:
-        return self._last_monitored_tendermint_rpc
+    def last_monitored_cometbft_rpc(self) -> Optional[float]:
+        return self._last_monitored_cometbft_rpc
 
     @property
     def last_monitored_cosmos_rest(self) -> Optional[float]:
@@ -169,13 +169,13 @@ class CosmosNode(Node):
         """
         self.set_went_down_at_cosmos_rest(None)
 
-    def set_went_down_at_tendermint_rpc(
-            self, went_down_at_tendermint_rpc: Optional[float]) -> None:
-        self._went_down_at_tendermint_rpc = went_down_at_tendermint_rpc
+    def set_went_down_at_cometbft_rpc(
+            self, went_down_at_cometbft_rpc: Optional[float]) -> None:
+        self._went_down_at_cometbft_rpc = went_down_at_cometbft_rpc
 
-    def set_tendermint_rpc_as_down(self, downtime: Optional[float]) -> None:
+    def set_cometbft_rpc_as_down(self, downtime: Optional[float]) -> None:
         """
-        This function sets the node's tendermint-rpc interface as down. It sets
+        This function sets the node's cometbft-rpc interface as down. It sets
         the time that the interface was initially down to the parameter
         'downtime' if it is not None, otherwise it sets it to the current
         timestamp.
@@ -183,17 +183,17 @@ class CosmosNode(Node):
         :return:
         """
         if downtime is None:
-            self.set_went_down_at_tendermint_rpc(datetime.now().timestamp())
+            self.set_went_down_at_cometbft_rpc(datetime.now().timestamp())
         else:
-            self.set_went_down_at_tendermint_rpc(downtime)
+            self.set_went_down_at_cometbft_rpc(downtime)
 
-    def set_tendermint_rpc_as_up(self) -> None:
+    def set_cometbft_rpc_as_up(self) -> None:
         """
-        This function sets a node's tendermint-rpc interface as up. A node's
-        interface is said to be up if went_down_at_tendermint_rpc is None.
+        This function sets a node's cometbft-rpc interface as up. A node's
+        interface is said to be up if went_down_at_cometbft_rpc is None.
         :return: None
         """
-        self.set_went_down_at_tendermint_rpc(None)
+        self.set_went_down_at_cometbft_rpc(None)
 
     def set_current_height(self, new_height: Optional[int]) -> None:
         self._current_height = new_height
@@ -273,9 +273,9 @@ class CosmosNode(Node):
             self, new_last_monitored_prometheus: Optional[float]) -> None:
         self._last_monitored_prometheus = new_last_monitored_prometheus
 
-    def set_last_monitored_tendermint_rpc(
-            self, new_last_monitored_tendermint_rpc: Optional[float]) -> None:
-        self._last_monitored_tendermint_rpc = new_last_monitored_tendermint_rpc
+    def set_last_monitored_cometbft_rpc(
+            self, new_last_monitored_cometbft_rpc: Optional[float]) -> None:
+        self._last_monitored_cometbft_rpc = new_last_monitored_cometbft_rpc
 
     def set_last_monitored_cosmos_rest(
             self, new_last_monitored_cosmos_rest: Optional[float]) -> None:
@@ -288,7 +288,7 @@ class CosmosNode(Node):
         """
         self.set_went_down_at_prometheus(None)
         self.set_went_down_at_cosmos_rest(None)
-        self.set_went_down_at_tendermint_rpc(None)
+        self.set_went_down_at_cometbft_rpc(None)
         self.set_current_height(None)
         self.set_voting_power(None)
         self.set_is_syncing(None)
@@ -299,4 +299,4 @@ class CosmosNode(Node):
         self.set_missed_blocks({'total_count': 0, 'missed_heights': []})
         self.set_last_monitored_prometheus(None)
         self.set_last_monitored_cosmos_rest(None)
-        self.set_last_monitored_tendermint_rpc(None)
+        self.set_last_monitored_cometbft_rpc(None)

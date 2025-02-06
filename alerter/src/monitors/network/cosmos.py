@@ -33,10 +33,10 @@ class CosmosNetworkMonitor(CosmosMonitor):
     result into unexpected behaviour.
 
     Note that different chains might also carry different versions of
-    Tendermint, resulting in different structures in the data retrieved. This
+    Cometbft, resulting in different structures in the data retrieved. This
     must also be catered with in the implemented data retrievals. In
-    development, only Tendermint versions for the latest Cosmos SDK chains were
-    considered. The Tendermint versions used by the latest Cosmos SDK chains
+    development, only Cometbft versions for the latest Cosmos SDK chains were
+    considered. The Cometbft versions used by the latest Cosmos SDK chains
     considered were v0.33.7, v0.33.8, v0.33.9, v0.34.11, v0.34.12.
     """
 
@@ -136,7 +136,7 @@ class CosmosNetworkMonitor(CosmosMonitor):
                  a valid schema
                : IncorrectJSONRetrievedException if the structure of the data
                  returned by the endpoints is not as expected. This could be
-                 both due to Tendermint or a Cosmos SDK update
+                 both due to Cometbft or a Cosmos SDK update
         """
         source_url = source.cosmos_rest_url
         source_name = source.node_name
@@ -175,7 +175,7 @@ class CosmosNetworkMonitor(CosmosMonitor):
                  a valid schema
                : IncorrectJSONRetrievedException if the structure of the data
                  returned by the endpoints is not as expected. This could be
-                 both due to a Tendermint or Cosmos SDK update
+                 both due to a Cometbft or Cosmos SDK update
         """
         source_url = source.cosmos_rest_url
         source_name = source.node_name
@@ -291,7 +291,7 @@ class CosmosNetworkMonitor(CosmosMonitor):
         retrieval_fn = supported_retrievals[self.last_rest_retrieval_version]
         data, data_retrieval_failed, data_retrieval_exception = retrieval_fn()
 
-        # If an exception related to Tendermint or Cosmos SDK version
+        # If an exception related to Cometbft or Cosmos SDK version
         # incompatibility is raised, we attempt to retrieve the data using other
         # supported versions. Start by removing the retrieval which we already
         # performed and iterate one by one until successful

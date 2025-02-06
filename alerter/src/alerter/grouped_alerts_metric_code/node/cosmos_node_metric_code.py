@@ -13,14 +13,14 @@ class GroupedCosmosNodeAlertsMetricCode(GroupedAlertsMetricCode):
     BlockHeightDifferenceThreshold = 'cosmos_node_height_difference'
     PrometheusInvalidUrl = 'cosmos_node_prometheus_url_invalid'
     CosmosRestInvalidUrl = 'cosmos_node_cosmos_rest_url_invalid'
-    TendermintRPCInvalidUrl = 'cosmos_node_tendermint_rpc_url_invalid'
+    CometbftRPCInvalidUrl = 'cosmos_node_cometbft_rpc_url_invalid'
     PrometheusSourceIsDown = 'cosmos_node_prometheus_is_down'
     CosmosRestSourceIsDown = 'cosmos_node_cosmos_rest_is_down'
-    TendermintRPCSourceIsDown = 'cosmos_node_tendermint_rpc_is_down'
+    CometbftRPCSourceIsDown = 'cosmos_node_cometbft_rpc_is_down'
     NoSyncedCosmosRestSource = 'cosmos_node_no_synced_cosmos_rest_source'
-    NoSyncedTendermintRPCSource = 'cosmos_node_no_synced_tendermint_rpc_source'
+    NoSyncedCometbftRPCSource = 'cosmos_node_no_synced_cometbft_rpc_source'
     CosmosRestDataNotObtained = 'cosmos_node_cosmos_rest_data_not_obtained'
-    TendermintRPCDataNotObtained = (
-        'cosmos_node_tendermint_rpc_data_not_obtained'
+    CometbftRPCDataNotObtained = (
+        'cosmos_node_cometbft_rpc_data_not_obtained'
     )
     MetricNotFound = 'cosmos_node_metric_not_found'

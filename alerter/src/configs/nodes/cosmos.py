@@ -6,7 +6,7 @@ class CosmosNodeConfig(NodeConfig):
             self, node_id: str, parent_id: str, node_name: str,
             monitor_node: bool, monitor_prometheus: bool, prometheus_url: str,
             monitor_cosmos_rest: bool, cosmos_rest_url: str,
-            monitor_tendermint_rpc: bool, tendermint_rpc_url: str,
+            monitor_cometbft_rpc: bool, cometbft_rpc_url: str,
             is_validator: bool, is_archive_node: bool, use_as_data_source: bool,
             operator_address: str) -> None:
         super().__init__(node_id, parent_id, node_name, monitor_node)
@@ -15,8 +15,8 @@ class CosmosNodeConfig(NodeConfig):
         self._prometheus_url = prometheus_url
         self._monitor_cosmos_rest = monitor_cosmos_rest
         self._cosmos_rest_url = cosmos_rest_url
-        self._monitor_tendermint_rpc = monitor_tendermint_rpc
-        self._tendermint_rpc_url = tendermint_rpc_url
+        self._monitor_cometbft_rpc = monitor_cometbft_rpc
+        self._cometbft_rpc_url = cometbft_rpc_url
         self._is_validator = is_validator
         self._is_archive_node = is_archive_node
         self._use_as_data_source = use_as_data_source
@@ -39,12 +39,12 @@ class CosmosNodeConfig(NodeConfig):
         return self._cosmos_rest_url
 
     @property
-    def monitor_tendermint_rpc(self) -> bool:
-        return self._monitor_tendermint_rpc
+    def monitor_cometbft_rpc(self) -> bool:
+        return self._monitor_cometbft_rpc
 
     @property
-    def tendermint_rpc_url(self) -> str:
-        return self._tendermint_rpc_url
+    def cometbft_rpc_url(self) -> str:
+        return self._cometbft_rpc_url
 
     @property
     def is_validator(self) -> bool:
@@ -74,11 +74,11 @@ class CosmosNodeConfig(NodeConfig):
     def set_cosmos_rest_url(self, cosmos_rest_url: str) -> None:
         self._cosmos_rest_url = cosmos_rest_url
 
-    def set_monitor_tendermint_rpc(self, monitor_tendermint_rpc: bool) -> None:
-        self._monitor_tendermint_rpc = monitor_tendermint_rpc
+    def set_monitor_cometbft_rpc(self, monitor_cometbft_rpc: bool) -> None:
+        self._monitor_cometbft_rpc = monitor_cometbft_rpc
 
-    def set_tendermint_rpc_url(self, tendermint_rpc_url: str) -> None:
-        self._tendermint_rpc_url = tendermint_rpc_url
+    def set_cometbft_rpc_url(self, cometbft_rpc_url: str) -> None:
+        self._cometbft_rpc_url = cometbft_rpc_url
 
     def set_is_validator(self, is_validator: bool) -> None:
         self._is_validator = is_validator

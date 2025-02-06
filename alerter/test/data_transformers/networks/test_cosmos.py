@@ -784,7 +784,7 @@ class TestCosmosNetworkTransformer(unittest.TestCase):
                  }
              },
          }, ('parent_id1', 'chain_name1',),),
-        ({'prometheus': {}, 'cosmos_rest': {}, 'tendermint_rpc': {}}, None,),
+        ({'prometheus': {}, 'cosmos_rest': {}, 'cometbft_rpc': {}}, None,),
         ({
              'cosmos_rest': {
                  'error': {
